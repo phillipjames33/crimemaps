@@ -1,0 +1,33 @@
+{
+  "name": "crime-maps-functions",
+  "version": "1.0.0",
+  "description": "Crime Maps Firebase Cloud Functions v2 (ingestion, civic camera sync, alerts, indie track moderation, free record removal).",
+  "private": true,
+  "main": "lib/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:watch": "tsc -p tsconfig.json --watch",
+    "clean": "node -e \"require('fs').rmSync('lib',{recursive:true,force:true})\"",
+    "test": "jest --ci",
+    "test:coverage": "jest --ci --coverage",
+    "seed": "npm run build && node lib/seed/seedFirestore.js",
+    "seed:emulator": "npm run build && node lib/seed/seedFirestore.js --emulator",
+    "serve": "npm run build && firebase emulators:start --only functions,firestore,storage,auth",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.5.1",
+    "firebase-functions": "^7.4.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.15.0",
+    "jest": "^30.0.0",
+    "ts-jest": "^29.4.15",
+    "typescript": "~5.9.3"
+  }
+}

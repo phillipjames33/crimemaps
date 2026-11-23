@@ -1,0 +1,164 @@
+rules_version = '2';
+
+// Crime Maps — Cloud Firestore Security Rules
+// Default-deny: anything not explicitly matched below is rejected.
+// Backend (Admin SDK / Cloud Functions) bypasses these rules for privileged writes.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ───────────────────────── Helpers ─────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isNonEmptyString(value) {
+      return value is string && value.trim().size() > 0;
+    }
+
+    function isBoundedString(value, maxLen) {
+      return isNonEmptyString(value) && value.size() <= maxLen;
+    }
+
+    function isOptionalBoundedString(data, field, maxLen) {
+      return !(field in data) || data[field] == null
+        || (data[field] is string && data[field].size() <= maxLen);
+    }
+
+    function isValidLatitude(value) {
+      return value is number && value >= -90 && value <= 90;
+    }
+
+    function isValidLongitude(value) {
+      return value is number && value >= -180 && value <= 180;
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    // ───────────────────── incidents (read-only) ─────────────────────
+    // Public read; all writes (ingestion, redaction, TTL) happen via Admin SDK.
+    match /incidents/{incidentId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ───────────────────────── cameras ─────────────────────────
+    // Civic transparency: only public infrastructure cameras may be pinned.
+    // Anti-doxxing: private residential cameras can NEVER be exact-pinned.
+    function isValidCommunityCamera(data) {
+      return data.type in ['alpr_flock', 'traffic', 'red_light']
+        && data.get('isPrivateResidence', false) != true
+        && data.get('source', 'community') == 'community'
+        && data.get('verified', false) == false
+        && isValidLatitude(data.latitude)
+        && isValidLongitude(data.longitude)
+        && isOptionalBoundedString(data, 'operatorName', 120)
+        && isOptionalBoundedString(data, 'streetNotes', 500);
+    }
+
+    match /cameras/{cameraId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidCommunityCamera(request.resource.data);
+      allow update, delete: if false;
+    }
+
+    // ─────────────────── territories (read-only) ───────────────────
+    match /territories/{territoryId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Community corrections go to moderation, never to live `territories`.
+    match /territory_submissions/{submissionId} {
+      allow create: if isSignedIn()
+        && request.resource.data.moderationStatus == 'pending_review'
+        && request.resource.data.submittedByUserId == request.auth.uid
+        && isBoundedString(request.resource.data.proposedName, 200)
+        && isBoundedString(request.resource.data.sourceCitation, 1000);
+      allow read: if isSignedIn() && resource.data.submittedByUserId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // ───────────────────────── tracks ─────────────────────────
+    function isValidRightsWarranty(warranty) {
+      return warranty is map
+        && warranty.owns100Percent == true
+        && isNonEmptyString(warranty.signedName)
+        && 'signedAt' in warranty
+        && (warranty.signedAt is timestamp
+            || (warranty.signedAt is string && warranty.signedAt.size() > 0));
+    }
+
+    function isValidTrackCreate(data) {
+      return data.artistId == request.auth.uid
+        && isValidRightsWarranty(data.rightsWarranty)
+        && data.status == 'processing'
+        && data.get('playCount', 0) == 0
+        && data.get('likeCount', 0) == 0
+        && data.get('boostedUntil', null) == null
+        && data.get('boostTargetZip', null) == null
+        && isBoundedString(data.title, 200);
+    }
+
+    function isDmcaFlagTransition() {
+      return changedKeys().hasOnly(['status'])
+        && request.resource.data.status == 'flagged_dmca';
+    }
+
+    function isCounterIncrement(field) {
+      return changedKeys().hasOnly([field])
+        && request.resource.data[field] is int
+        && request.resource.data[field] == resource.data.get(field, 0) + 1;
+    }
+
+    match /tracks/{trackId} {
+      // Public read ONLY for active tracks; artists may also see their own
+      // processing / rejected / flagged tracks in the Creator Portal.
+      allow read: if resource.data.status == 'active'
+        || (isSignedIn() && resource.data.artistId == request.auth.uid);
+      allow create: if isSignedIn() && isValidTrackCreate(request.resource.data);
+      allow update: if isSignedIn()
+        && (isDmcaFlagTransition()
+            || isCounterIncrement('playCount')
+            || isCounterIncrement('likeCount'));
+      allow delete: if false;
+    }
+
+    // ───────────────────────── users ─────────────────────────
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+
+      match /{subPath=**} {
+        allow read, write: if isSignedIn() && request.auth.uid == userId;
+      }
+    }
+
+    // ─────────────── removal_requests (100% free) ───────────────
+    // Anyone (no account, no payment) may request record removal / expungement.
+    match /removal_requests/{requestId} {
+      allow create: if isBoundedString(request.resource.data.incidentId, 200)
+        && isBoundedString(request.resource.data.requesterName, 200)
+        && isBoundedString(request.resource.data.reason, 100)
+        && isOptionalBoundedString(request.resource.data, 'requesterEmail', 320)
+        && isOptionalBoundedString(request.resource.data, 'caseNumber', 100)
+        && isOptionalBoundedString(request.resource.data, 'additionalNotes', 2000);
+      allow read, update, delete: if false;
+    }
+
+    // ───────────────────── dmca_claims ─────────────────────
+    match /dmca_claims/{claimId} {
+      allow create: if isBoundedString(request.resource.data.trackId, 200)
+        && isBoundedString(request.resource.data.claimantName, 200)
+        && request.resource.data.goodFaithBeliefConfirmed == true
+        && request.resource.data.perjuryStatementConfirmed == true
+        && isBoundedString(request.resource.data.electronicSignature, 200);
+      allow read, update, delete: if false;
+    }
+
+    // ─────────────────────── Default deny ───────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

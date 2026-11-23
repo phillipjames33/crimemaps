@@ -1,0 +1,43 @@
+rules_version = '2';
+
+// Crime Maps — Firebase Storage Security Rules
+// Default-deny: anything not explicitly matched below is rejected.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAllowedContentType() {
+      return request.resource.contentType.matches(
+        '^(audio/mpeg|audio/wav|audio/x-wav|audio/mp4|image/jpeg|image/png|image/webp)$');
+    }
+
+    function isAudioUpload() {
+      return request.resource.contentType.matches('^audio/.*$');
+    }
+
+    // 100% Indie Music Rights: audio requires a signed ownership warranty.
+    function hasRightsWarrantyMetadata() {
+      return request.resource.metadata != null
+        && 'owns100Percent' in request.resource.metadata
+        && 'signedName' in request.resource.metadata
+        && request.resource.metadata.owns100Percent == 'true'
+        && request.resource.metadata.signedName is string
+        && request.resource.metadata.signedName.trim().size() > 0;
+    }
+
+    match /tracks/{artistId}/{trackId}/{fileName} {
+      allow read: if true;
+      allow create, update: if request.auth != null
+        && request.auth.uid == artistId
+        && request.resource.size <= 25 * 1024 * 1024
+        && isAllowedContentType()
+        && (!isAudioUpload() || hasRightsWarrantyMetadata());
+      // Deletion is backend-only (preserves DMCA / moderation evidence).
+      allow delete: if false;
+    }
+
+    // Default deny (includes backend-only `quarantine/` path).
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
