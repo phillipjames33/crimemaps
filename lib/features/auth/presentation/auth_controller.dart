@@ -155,4 +155,24 @@ class AuthController extends _$AuthController {
       state = state.copyWith(clearUser: true, isLoading: false);
     }
   }
+
+  Future<bool> deleteAccount() async {
+    state = state.copyWith(isLoading: true, clearError: true, clearInfo: true);
+    try {
+      await _repository.deleteAccount();
+      if (!_disposed) {
+        state = state.copyWith(
+          clearUser: true,
+          isLoading: false,
+          infoMessage: 'Your Crime Maps account and profile have been deleted.',
+        );
+      }
+      return true;
+    } catch (e) {
+      if (!_disposed) {
+        state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      }
+      return false;
+    }
+  }
 }

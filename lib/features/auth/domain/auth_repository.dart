@@ -26,4 +26,8 @@ abstract class AuthRepository {
   Future<void> sendPasswordReset(String email);
 
   Future<void> signOut();
+
+  /// Permanently deletes the signed-in user's account and `users/{uid}` profile
+  /// (mandatory under Apple App Store Guideline 5.1.1(v) and Google Play Data Safety).
+  Future<void> deleteAccount();
 }

@@ -1,0 +1,74 @@
+name: Crime Maps Verification Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  flutter-verify:
+    name: Flutter Codegen, Analyze & Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: dart run build_runner build --delete-conflicting-outputs
+      - run: flutter analyze --fatal-infos
+      - run: flutter test --reporter expanded
+
+  functions-verify:
+    name: Firebase Functions Build & Jest
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: functions
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+
+  compliance-and-security-scan:
+    name: Compliance, Secret & Architecture Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for hardcoded API keys
+        run: |
+          if grep -rnE "AIzaSy|sk_live_|appl_|goog_" lib/ functions/src/ hosting/ memory.md README.md docs/; then
+            echo "ERROR: Hardcoded secret pattern detected!"
+            exit 1
+          fi
+      - name: Check for banned Apple Guideline 1.4.4 evasion phrases
+        run: |
+          if grep -rniE "evade police|avoid cops|dodge camera|speed trap|avoid police|evade cops|dodge speed traps|hide from cameras|beat the radar" lib/ functions/src/ hosting/; then
+            echo "ERROR: Banned Apple 1.4.4 evasion string detected!"
+            exit 1
+          fi
+      - name: Confirm Presumed Innocent disclaimer exists in offender widget test
+        run: |
+          grep -qi "presumed innocent" test/features/incidents/alleged_offender_card_test.dart
+      - name: Enforce strict Flutter layering & Riverpod codegen
+        run: |
+          if grep -rnE "package:cloud_firestore|package:firebase_storage|package:geolocator" lib/features/*/presentation/; then
+            echo "ERROR: Forbidden SDK import in presentation/!"
+            exit 1
+          fi
+          if grep -rnE "package:flutter/|package:cloud_firestore|package:firebase_" lib/features/*/domain/; then
+            echo "ERROR: Forbidden UI/Firebase import in domain/!"
+            exit 1
+          fi
+          if grep -rnE "StateNotifierProvider|ChangeNotifierProvider" lib/; then
+            echo "ERROR: Legacy Riverpod provider detected!"
+            exit 1
+          fi

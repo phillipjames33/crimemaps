@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/config/compliance_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../domain/auth_user.dart';
 import 'auth_controller.dart';
@@ -132,9 +134,48 @@ class _AuthSheetState extends ConsumerState<AuthSheet> {
             ? _SignedInProfileView(
                 user: user,
                 isLoading: authState.isLoading,
+                errorMessage: authState.errorMessage,
                 onSignOut: () async {
                   await ref.read(authControllerProvider.notifier).signOut();
                   if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                },
+                onDeleteAccount: () async {
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (BuildContext dialogContext) {
+                      return AlertDialog(
+                        backgroundColor: AppTheme.surfaceDark,
+                        title: const Text('Delete Account?'),
+                        content: const Text(
+                          'This permanently deletes your Crime Maps account and saved profile settings. This action cannot be undone.',
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.of(dialogContext).pop(false),
+                            child: const Text('Cancel'),
+                          ),
+                          ElevatedButton(
+                            key: const Key('auth_confirm_delete_button'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.accentCrimson,
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: () =>
+                                Navigator.of(dialogContext).pop(true),
+                            child: const Text('Delete Permanently'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                  if (confirmed != true) return;
+                  final deleted = await ref
+                      .read(authControllerProvider.notifier)
+                      .deleteAccount();
+                  if (deleted && context.mounted) {
                     Navigator.of(context).pop();
                   }
                 },
@@ -340,9 +381,48 @@ class _AuthSheetState extends ConsumerState<AuthSheet> {
                         ),
                     ],
                   ),
+                  const Divider(height: 20),
+                  const _LegalLinksRow(),
                 ],
               ),
       ),
+    );
+  }
+}
+
+class _LegalLinksRow extends StatelessWidget {
+  const _LegalLinksRow();
+
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.parse(url);
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 12,
+      children: <Widget>[
+        TextButton(
+          onPressed: () =>
+              unawaited(_openUrl(ComplianceConstants.privacyPolicyUrl)),
+          child: const Text('Privacy Policy', style: TextStyle(fontSize: 12)),
+        ),
+        TextButton(
+          onPressed: () =>
+              unawaited(_openUrl(ComplianceConstants.termsOfServiceUrl)),
+          child: const Text('Terms & DMCA', style: TextStyle(fontSize: 12)),
+        ),
+        TextButton(
+          onPressed: () =>
+              unawaited(_openUrl(ComplianceConstants.freeRemovalPortalUrl)),
+          child: const Text(
+            'Free Record Removal',
+            style: TextStyle(fontSize: 12),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -352,11 +432,15 @@ class _SignedInProfileView extends StatelessWidget {
     required this.user,
     required this.isLoading,
     required this.onSignOut,
+    required this.onDeleteAccount,
+    this.errorMessage,
   });
 
   final AppUser user;
   final bool isLoading;
+  final String? errorMessage;
   final VoidCallback onSignOut;
+  final VoidCallback onDeleteAccount;
 
   @override
   Widget build(BuildContext context) {
@@ -364,6 +448,25 @@ class _SignedInProfileView extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
+        if (errorMessage != null) ...<Widget>[
+          Container(
+            padding: const EdgeInsets.all(10),
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: AppTheme.accentCrimson.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppTheme.accentCrimson),
+            ),
+            child: Text(
+              errorMessage!,
+              style: const TextStyle(
+                color: AppTheme.accentCrimson,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
         Row(
           children: <Widget>[
             CircleAvatar(
@@ -419,12 +522,28 @@ class _SignedInProfileView extends StatelessWidget {
         OutlinedButton.icon(
           key: const Key('auth_signout_button'),
           onPressed: isLoading ? null : onSignOut,
-          icon: const Icon(Icons.logout_rounded, color: AppTheme.accentCrimson),
+          icon: const Icon(Icons.logout_rounded, color: AppTheme.accentAmber),
           label: const Text(
             'Sign Out',
+            style: TextStyle(color: AppTheme.accentAmber),
+          ),
+        ),
+        const SizedBox(height: 10),
+        TextButton.icon(
+          key: const Key('auth_delete_account_button'),
+          onPressed: isLoading ? null : onDeleteAccount,
+          icon: const Icon(
+            Icons.delete_forever_outlined,
+            color: AppTheme.accentCrimson,
+            size: 18,
+          ),
+          label: const Text(
+            'Delete Account Permanently',
             style: TextStyle(color: AppTheme.accentCrimson),
           ),
         ),
+        const Divider(height: 20),
+        const _LegalLinksRow(),
       ],
     );
   }

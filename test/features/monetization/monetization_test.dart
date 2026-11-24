@@ -113,6 +113,12 @@ void main() {
       expect(find.text('Pro Annual'), findsOneWidget);
       expect(find.text('Pro Monthly'), findsOneWidget);
 
+      // Verify Apple Guideline 3.1.2(c) legal & free-removal links
+      expect(find.byKey(const Key('paywall_legal_footer')), findsOneWidget);
+      expect(find.byKey(const Key('paywall_privacy_link')), findsOneWidget);
+      expect(find.byKey(const Key('paywall_terms_link')), findsOneWidget);
+      expect(find.byKey(const Key('paywall_removal_link')), findsOneWidget);
+
       // Tap Upgrade Button
       final Finder upgradeButton = find.byKey(const Key('paywall_upgrade_button'));
       expect(upgradeButton, findsOneWidget);

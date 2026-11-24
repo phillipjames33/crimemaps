@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/config/compliance_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../auth/presentation/auth_sheet.dart';
 import '../domain/subscription_tier.dart';
@@ -214,6 +216,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   const SizedBox(height: 24),
                 ],
                 _buildCustomGeofenceSection(state),
+                const SizedBox(height: 24),
+                _buildSubscriptionLegalFooter(),
               ],
             ),
           );
@@ -708,6 +712,89 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           },
         ),
       ],
+    );
+  }
+
+  Future<void> _openExternalLink(String url) async {
+    final Uri uri = Uri.parse(url);
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  Widget _buildSubscriptionLegalFooter() {
+    return Container(
+      key: const Key('paywall_legal_footer'),
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceDark,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.borderSubtle),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const Text(
+            'Subscriptions renew automatically unless canceled at least 24 hours '
+            'before the end of the current period in your App Store or Google Play '
+            'account settings. Record removal is always 100% free and never '
+            'requires a Pro membership.',
+            style: TextStyle(
+              fontSize: 11,
+              color: AppTheme.textSecondary,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 12,
+            runSpacing: 4,
+            children: <Widget>[
+              TextButton(
+                key: const Key('paywall_privacy_link'),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(0, 28),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                onPressed: () =>
+                    _openExternalLink(ComplianceConstants.privacyPolicyUrl),
+                child: const Text(
+                  'Privacy Policy',
+                  style: TextStyle(fontSize: 12, color: AppTheme.accentCyan),
+                ),
+              ),
+              TextButton(
+                key: const Key('paywall_terms_link'),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(0, 28),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                onPressed: () =>
+                    _openExternalLink(ComplianceConstants.termsOfServiceUrl),
+                child: const Text(
+                  'Terms of Service',
+                  style: TextStyle(fontSize: 12, color: AppTheme.accentCyan),
+                ),
+              ),
+              TextButton(
+                key: const Key('paywall_removal_link'),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(0, 28),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                onPressed: () =>
+                    _openExternalLink(ComplianceConstants.freeRemovalPortalUrl),
+                child: const Text(
+                  'Free Record Removal',
+                  style: TextStyle(fontSize: 12, color: AppTheme.accentEmerald),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

@@ -43,3 +43,15 @@ Use the sections below when submitting **Crime Maps** to **Apple App Store Conne
 
 - **100% Ownership Attestation:** Artists cannot upload audio unless they check the 100% master & publishing rights warranty and provide a typed electronic legal signature (`rightsWarranty.owns100Percent == true`, `signedName`, `signedAt`, `version`). This is enforced in the Flutter Creator Portal UI, `storage.rules`, `firestore.rules`, and `onTrackUploaded`.
 - **Instant DMCA Soft-Takedown:** Every track card and the persistent mini-player expose a one-click **"Report Copyright Infringement (DMCA)"** flow that records a sworn claim in `dmca_claims` and immediately transitions `tracks/{trackId}.status` to `'flagged_dmca'`, removing the track from public queries.
+
+---
+
+## 6. Hosted Legal Portal, In-App Account Deletion (Guideline 5.1.1(v)) & Subscription Disclosures (Guideline 3.1.2(c))
+
+- **Live Hosted Legal & Transparency Portal (Firebase Hosting — `crimemaps-515702`):**
+  - Overview & Support URL: `https://crimemaps-515702.web.app/`
+  - Privacy Policy URL (App Store Connect & Google Play Data Safety): `https://crimemaps-515702.web.app/privacy.html`
+  - Terms of Service & DMCA Policy URL: `https://crimemaps-515702.web.app/terms.html`
+  - 100% Free Record Removal & Web Account Deletion URL (Google Play Account Deletion): `https://crimemaps-515702.web.app/removal.html`
+- **In-App Permanent Account Deletion (Apple Guideline 5.1.1(v)):** Signed-in users can permanently delete their Firebase Auth account and `users/{uid}` Firestore profile directly inside the **Account** sheet (`AuthSheet` -> **Delete Account Permanently** with confirmation dialog). Guest browsing and 100% free record removal never require an account.
+- **Paywall Legal Disclosures (Apple Guideline 3.1.2(c)):** `PaywallScreen` displays auto-renewal cancellation terms alongside clickable **Privacy Policy**, **Terms of Service**, and **Free Record Removal** links.

@@ -23,6 +23,14 @@ class ComplianceConstants {
   /// Current version identifier for the 100% indie music ownership attestation.
   static const String rightsAttestationVersion = '2026-v1.0';
 
+  /// Hosted legal & compliance URLs (deployed on Firebase Hosting).
+  static const String privacyPolicyUrl =
+      'https://crimemaps-515702.web.app/privacy.html';
+  static const String termsOfServiceUrl =
+      'https://crimemaps-515702.web.app/terms.html';
+  static const String freeRemovalPortalUrl =
+      'https://crimemaps-515702.web.app/removal.html';
+
   /// Maximum allowed audio file size (25 MB) for creator uploads.
   static const int maxAudioUploadBytes = 25 * 1024 * 1024;
 

@@ -99,5 +99,23 @@ void main() {
         equals('phillip@example.com'),
       );
     });
+
+    test('deleteAccount permanently clears signed-in user state', () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      await container.read(authControllerProvider.notifier).signUpWithEmail(
+            email: 'delete-me@crimemaps.dev',
+            password: 'password123',
+            displayName: 'Temp User',
+          );
+      expect(container.read(authControllerProvider).isAuthenticated, isTrue);
+
+      final deleted =
+          await container.read(authControllerProvider.notifier).deleteAccount();
+      expect(deleted, isTrue);
+      expect(container.read(authControllerProvider).isAuthenticated, isFalse);
+      expect(container.read(authControllerProvider).user, isNull);
+    });
   });
 }

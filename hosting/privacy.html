@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — Crime Maps</title>
+  <meta name="description" content="Crime Maps Privacy Policy covering location privacy, local spatial caching, Firebase services, RevenueCat subscriptions, 45-day record TTL, and permanent account deletion.">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <div class="nav-wrap">
+      <a class="brand" href="/">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <span>Crime Maps</span>
+      </a>
+      <nav aria-label="Legal navigation">
+        <a href="/">Overview</a>
+        <a href="/privacy.html" class="active">Privacy Policy</a>
+        <a href="/terms.html">Terms &amp; DMCA</a>
+        <a href="/removal.html">Free Record Removal</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <span class="badge">Privacy &amp; Data Safety</span>
+      <h1>Privacy Policy</h1>
+      <p class="meta">Effective Date: November 24, 2026 &middot; App IDs: <code>com.crimemaps.crime_maps</code> (Android) &amp; <code>com.crimemaps.crimeMaps</code> (iOS)</p>
+      <p class="lead">
+        Crime Maps is designed to minimize data collection while delivering real-time public safety
+        awareness, civic infrastructure transparency, and localized independent music.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>1. Information We Collect</h2>
+      <ul>
+        <li>
+          <strong>Account Data (Optional):</strong> You may browse the map anonymously without
+          creating an account. If you sign in with Email/Password via Firebase Authentication, we
+          store your Firebase user ID (UID), email address, display name, and subscription entitlement
+          status in Cloud Firestore (<code>users/{uid}</code>).
+        </li>
+        <li>
+          <strong>Location Data (On-Device First):</strong> With your permission, Crime Maps accesses
+          device GPS coordinates to center the map, query nearby public incident feeds by coarse
+          geohash bounding box, play Geo-Radio tracks for your current metro area, and trigger civic
+          safety awareness alerts for publicly mapped traffic cameras.
+        </li>
+        <li>
+          <strong>Zero Continuous Server Location Tracking:</strong> Public traffic camera alerts are
+          computed <strong>100% locally on your device</strong> using an on-device spatial cache
+          (Hive). Your continuous GPS trail is never streamed or stored on Crime Maps servers.
+        </li>
+        <li>
+          <strong>Creator Uploads &amp; Community Submissions:</strong> If you voluntarily upload an
+          independent audio track or submit a historical neighborhood context note, we store your
+          uploaded file metadata, creator attribution, copyright warranty attestation timestamp, and
+          target zip/city identifier.
+        </li>
+        <li>
+          <strong>Purchase &amp; Subscription Metadata:</strong> In-app subscriptions (Crime Maps Pro)
+          and creator track boosts are processed natively by Apple App Store and Google Play Billing
+          and synced via RevenueCat. Crime Maps never receives or stores your payment card details.
+        </li>
+      </ul>
+
+      <h2>2. How We Use Information</h2>
+      <ul>
+        <li>Display publicly sourced municipal crime feeds and historical neighborhood context.</li>
+        <li>Deliver opt-in push notifications for high-severity incidents in subscribed metro topics via Firebase Cloud Messaging (FCM).</li>
+        <li>Process 100% free record removal/expungement requests and DMCA takedown notices.</li>
+        <li>Verify active Pro entitlements to remove advertisements and unlock extended awareness layers.</li>
+      </ul>
+
+      <h2>3. Third-Party Service Providers</h2>
+      <ul>
+        <li><strong>Google Firebase (Auth, Cloud Firestore, Cloud Storage, Cloud Functions, FCM):</strong> Backend hosting, authentication, and public feed ingestion.</li>
+        <li><strong>Google Maps Platform:</strong> Dark-mode map rendering and public Street View imagery.</li>
+        <li><strong>RevenueCat:</strong> Cross-platform Apple App Store and Google Play subscription validation.</li>
+        <li><strong>Google AdMob (Free Tier Only):</strong> Banner advertisements displayed to non-Pro users. Pro subscribers experience zero ads.</li>
+      </ul>
+
+      <h2>4. Data Retention &amp; 45-Day Automatic Record Expiration</h2>
+      <p>
+        Public arrest and booking incident documents ingested into Crime Maps carry a strict
+        <strong>45-day automatic Time-To-Live (TTL)</strong> and are automatically purged by
+        Firestore once expired. Individuals can also request immediate, permanent, 100% free
+        removal at any time via the <a href="/removal.html">Free Record Removal Portal</a>.
+      </p>
+
+      <h2>5. Account Deletion &amp; Your Privacy Rights</h2>
+      <div class="callout emerald">
+        <strong>Instant In-App Account Deletion:</strong> Signed-in users can permanently delete
+        their account and associated user profile document at any time inside the Crime Maps app by
+        opening the <strong>Account</strong> sheet (top-right profile icon on the Map screen) and
+        tapping <strong>Delete Account Permanently</strong>.
+      </div>
+      <p>
+        You may also request account deletion, data export, or correction without installing the app
+        by visiting our <a href="/removal.html#account-deletion">Account Deletion &amp; Removal
+        Portal</a> or emailing <a href="mailto:phillipojames@gmail.com">phillipojames@gmail.com</a>.
+      </p>
+
+      <h2>6. Children's Privacy</h2>
+      <p>
+        Crime Maps is not directed to children under 13 (or 16 where applicable by law) and does not
+        knowingly collect personal information from children.
+      </p>
+
+      <h2>7. Contact</h2>
+      <p>
+        Questions regarding this Privacy Policy may be sent to
+        <a href="mailto:phillipojames@gmail.com">phillipojames@gmail.com</a>.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    &copy; 2026 Crime Maps &middot;
+    <a href="/">Overview</a> &middot;
+    <a href="/terms.html">Terms &amp; DMCA</a> &middot;
+    <a href="/removal.html">Free Record Removal</a>
+  </footer>
+</body>
+</html>

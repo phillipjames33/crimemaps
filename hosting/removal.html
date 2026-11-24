@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>100% Free Record Removal &amp; Account Deletion — Crime Maps</title>
+  <meta name="description" content="Request 100% free arrest record expungement/removal or permanently delete your Crime Maps user account.">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <div class="nav-wrap">
+      <a class="brand" href="/">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <span>Crime Maps</span>
+      </a>
+      <nav aria-label="Legal navigation">
+        <a href="/">Overview</a>
+        <a href="/privacy.html">Privacy Policy</a>
+        <a href="/terms.html">Terms &amp; DMCA</a>
+        <a href="/removal.html" class="active">Free Record Removal</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <span class="badge emerald">Always 100% Free &middot; Zero Fees</span>
+      <h1>Free Record Removal &amp; Account Deletion</h1>
+      <p class="lead">
+        Crime Maps never charges a fee to remove an arrest or booking record, and every user can
+        permanently delete their account and associated personal data at any time.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>1. 100% Free Arrest / Booking Record Removal</h2>
+      <p>
+        Every person referenced in a public booking entry is <strong>presumed innocent until proven
+        guilty in a court of law</strong>. All booking records expire automatically after
+        <strong>45 days</strong> via server-side TTL, and you may request immediate suppression at
+        zero cost:
+      </p>
+      <ul>
+        <li>
+          <strong>Fastest (In-App Instant Suppression):</strong> Open any booking record card in
+          Crime Maps and tap <strong>Request Free Record Removal</strong>. Submitting a valid
+          dismissal, expungement, sealed-record, or mistaken-identity notice triggers our automated
+          <code>submitMugshotRemoval</code> workflow to immediately hide the entry and log an
+          auditable compliance receipt.
+        </li>
+        <li>
+          <strong>Web / Email Removal Request (No App Required):</strong> Email
+          <a href="mailto:phillipojames@gmail.com?subject=Free%20Record%20Removal%20Request%20-%20Crime%20Maps">phillipojames@gmail.com</a>
+          with the subject <strong>"Free Record Removal Request - Crime Maps"</strong> and include the
+          incident ID (or city, approximate date, and title) along with your reason (expungement,
+          dismissal, sealing, or correction). We process all removal requests free of charge.
+        </li>
+      </ul>
+      <div class="cta-row">
+        <a class="btn" href="mailto:phillipojames@gmail.com?subject=Free%20Record%20Removal%20Request%20-%20Crime%20Maps">
+          Email Free Removal Request
+        </a>
+      </div>
+    </section>
+
+    <section class="card" id="account-deletion" style="margin-top: 22px;">
+      <h2>2. Permanent User Account Deletion</h2>
+      <p>
+        In full compliance with Apple App Store Guideline 5.1.1(v) and Google Play Data Safety
+        requirements, you can permanently delete your Crime Maps account and associated profile
+        data in either of two ways:
+      </p>
+      <ol>
+        <li>
+          <strong>Directly Inside the Crime Maps App:</strong> Tap the <strong>Account</strong>
+          icon in the top-right corner of the Map screen, then select
+          <strong>Delete Account Permanently</strong> and confirm. This immediately deletes your
+          Cloud Firestore user profile (<code>users/{uid}</code>) and permanently removes your
+          Firebase Authentication account.
+        </li>
+        <li>
+          <strong>Web / Email Account Deletion Request:</strong> If you have already uninstalled
+          Crime Maps, email
+          <a href="mailto:phillipojames@gmail.com?subject=Account%20Deletion%20Request%20-%20Crime%20Maps">phillipojames@gmail.com</a>
+          from the email address registered to your account with subject
+          <strong>"Account Deletion Request - Crime Maps"</strong>. We will delete your Firebase
+          Authentication record and Firestore profile data and confirm completion within 7 days.
+        </li>
+      </ol>
+      <p>
+        <strong>What Is Deleted:</strong> Your Firebase Auth credentials, email address, display
+        name, and Firestore <code>users/{uid}</code> profile record. Note that active Apple App
+        Store or Google Play subscriptions must still be canceled in your device's store settings
+        to stop recurring billing.
+      </p>
+      <div class="cta-row">
+        <a class="btn secondary" href="mailto:phillipojames@gmail.com?subject=Account%20Deletion%20Request%20-%20Crime%20Maps">
+          Request Account Deletion via Email
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    &copy; 2026 Crime Maps &middot;
+    <a href="/">Overview</a> &middot;
+    <a href="/privacy.html">Privacy Policy</a> &middot;
+    <a href="/terms.html">Terms &amp; DMCA</a>
+  </footer>
+</body>
+</html>

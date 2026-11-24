@@ -231,6 +231,36 @@ class FirebaseAuthRepository implements AuthRepository {
     _emitUser(null);
   }
 
+  @override
+  Future<void> deleteAccount() async {
+    final existing = _currentUser;
+    if (_useLiveFirebase) {
+      final fbUser = fb.FirebaseAuth.instance.currentUser;
+      if (fbUser != null) {
+        try {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(fbUser.uid)
+              .delete();
+        } catch (_) {
+          // Proceed with Auth deletion even if profile doc did not exist.
+        }
+        try {
+          await fbUser.delete();
+        } on fb.FirebaseAuthException catch (e) {
+          throw AuthFailureException(
+            e.code == 'requires-recent-login'
+                ? 'Please sign out and sign back in briefly before deleting your account.'
+                : (e.message ?? 'Could not delete account.'),
+          );
+        }
+      }
+    } else if (existing == null) {
+      throw const AuthFailureException('No signed-in account to delete.');
+    }
+    _emitUser(null);
+  }
+
   void _emitUser(AppUser? user) {
     _currentUser = user;
     if (!_controller.isClosed) {
