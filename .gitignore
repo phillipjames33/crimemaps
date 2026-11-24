@@ -62,3 +62,6 @@ functions/lib/
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
+
+# Generated local web config (reads API keys from .env; never commit)
+web/env_config.js

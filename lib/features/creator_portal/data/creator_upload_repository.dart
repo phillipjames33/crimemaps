@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
@@ -134,7 +135,9 @@ class CreatorUploadRepositoryImpl implements CreatorUploadRepository {
           .doc(trackId)
           .set(initialTrack.toJson());
 
-      if (request.localAudioPath != null && request.localAudioPath!.isNotEmpty) {
+      if (!kIsWeb &&
+          request.localAudioPath != null &&
+          request.localAudioPath!.isNotEmpty) {
         final Reference storageRef = FirebaseStorage.instance
             .ref()
             .child('tracks/$uid/$trackId/${request.audioFileName}');
@@ -155,7 +158,9 @@ class CreatorUploadRepositoryImpl implements CreatorUploadRepository {
         audioUrl = await snapshot.ref.getDownloadURL();
       }
 
-      if (request.localCoverPath != null && request.localCoverPath!.isNotEmpty) {
+      if (!kIsWeb &&
+          request.localCoverPath != null &&
+          request.localCoverPath!.isNotEmpty) {
         final Reference coverRef = FirebaseStorage.instance
             .ref()
             .child('covers/$uid/$trackId/cover.jpg');

@@ -1,5 +1,5 @@
-import 'dart:io';
-
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -69,11 +69,11 @@ class RevenueCatMonetizationRepository implements MonetizationRepository {
   ];
 
   Future<void> _ensureConfigured() async {
-    if (_configured) return;
+    if (_configured || kIsWeb) return;
     if (!AppEnv.useMockData &&
         (AppEnv.hasRevenueCatIosKey || AppEnv.hasRevenueCatAndroidKey)) {
       try {
-        final String apiKey = Platform.isIOS
+        final String apiKey = defaultTargetPlatform == TargetPlatform.iOS
             ? AppEnv.revenueCatIosKey
             : AppEnv.revenueCatAndroidKey;
 

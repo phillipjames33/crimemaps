@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -406,51 +407,68 @@ class _CrimeMapScreenState extends ConsumerState<CrimeMapScreen> {
         ? _buildDensityCircles(densityCells)
         : const <Circle>{};
 
+    final mapWidget = GoogleMap(
+      initialCameraPosition: CameraPosition(
+        target: LatLng(viewport.centerLat, viewport.centerLng),
+        zoom: viewport.zoom,
+        tilt: viewport.tilt,
+        bearing: viewport.bearing,
+      ),
+      style: _darkMapStyle,
+      mapId: !kIsWeb && AppEnv.googleMapsMapId.isNotEmpty
+          ? AppEnv.googleMapsMapId
+          : null,
+      myLocationEnabled: false,
+      myLocationButtonEnabled: false,
+      zoomControlsEnabled: false,
+      compassEnabled: true,
+      buildingsEnabled: true,
+      tiltGesturesEnabled: true,
+      rotateGesturesEnabled: true,
+      markers: markers,
+      polygons: polygons,
+      circles: circles,
+      onMapCreated: (GoogleMapController controller) {
+        _mapController = controller;
+      },
+      onCameraMove: (CameraPosition position) {
+        if ((position.zoom - _renderedZoom).abs() >= 0.4) {
+          setState(() {
+            _renderedZoom = position.zoom;
+          });
+        }
+      },
+      onCameraIdle: () {
+        _isUpdatingFromGesture = false;
+      },
+      onCameraMoveStarted: () {
+        _isUpdatingFromGesture = true;
+      },
+    );
+
+    final bottomCarousel = Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: SafeArea(
+        top: false,
+        child: _IncidentPeekCarousel(
+          incidentsAsync: incidentsAsync,
+          territories: territories,
+          showTerritories: viewport.showTerritoriesLayer,
+          activeScopeLabel: _scopeSummaryLabel(viewport),
+          onTapIncident: _openIncidentSheet,
+          onTapTerritory: _openTerritorySheet,
+        ),
+      ),
+    );
+
     return Scaffold(
       backgroundColor: AppTheme.bgDark,
       body: Stack(
         children: <Widget>[
           // Full-screen dark car-navigation Google Map
-          Positioned.fill(
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: LatLng(viewport.centerLat, viewport.centerLng),
-                zoom: viewport.zoom,
-                tilt: viewport.tilt,
-                bearing: viewport.bearing,
-              ),
-              style: _darkMapStyle,
-              mapId: AppEnv.googleMapsMapId.isNotEmpty
-                  ? AppEnv.googleMapsMapId
-                  : null,
-              myLocationEnabled: false,
-              myLocationButtonEnabled: false,
-              zoomControlsEnabled: false,
-              compassEnabled: true,
-              buildingsEnabled: true,
-              tiltGesturesEnabled: true,
-              rotateGesturesEnabled: true,
-              markers: markers,
-              polygons: polygons,
-              circles: circles,
-              onMapCreated: (GoogleMapController controller) {
-                _mapController = controller;
-              },
-              onCameraMove: (CameraPosition position) {
-                if ((position.zoom - _renderedZoom).abs() >= 0.4) {
-                  setState(() {
-                    _renderedZoom = position.zoom;
-                  });
-                }
-              },
-              onCameraIdle: () {
-                _isUpdatingFromGesture = false;
-              },
-              onCameraMoveStarted: () {
-                _isUpdatingFromGesture = true;
-              },
-            ),
-          ),
+          Positioned.fill(child: mapWidget),
 
           // Top floating car-nav scope bar, optional camera radar banner & layer toggles
           Positioned(
@@ -479,22 +497,7 @@ class _CrimeMapScreenState extends ConsumerState<CrimeMapScreen> {
           ),
 
           // Bottom incident peek carousel + territory quick access
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: SafeArea(
-              top: false,
-              child: _IncidentPeekCarousel(
-                incidentsAsync: incidentsAsync,
-                territories: territories,
-                showTerritories: viewport.showTerritoriesLayer,
-                activeScopeLabel: _scopeSummaryLabel(viewport),
-                onTapIncident: _openIncidentSheet,
-                onTapTerritory: _openTerritorySheet,
-              ),
-            ),
-          ),
+          bottomCarousel,
         ],
       ),
     );
