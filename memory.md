@@ -3,6 +3,7 @@
 > **Living Document:** Update this file whenever a feature, integration, verification step, or deployment milestone is completed, or when new work / blockers are identified. Never store API keys, tokens, or secrets in this file.
 
 - **Last Updated:** 2026-11-24
+- **GitHub Repository:** https://github.com/phillipjames33/crimemaps (`origin/main`)
 - **Default Branch:** `main`
 - **Google Cloud Project:** `crimemaps-515702` (Project Number `864680228535`)
 - **RevenueCat Project:** `CrimeMapsAi` (`proj3c8fa1e5`)
@@ -45,6 +46,7 @@
 - [x] **Module E (Monetization, FCM & Compliance):** RevenueCat v9 Free vs Pro paywall (`PaywallScreen`), `FreeTierAdBanner` (auto-hidden for Pro), custom geofence & FCM topic manager, `ArtistBoostSheet`, 100% free `MugshotRemovalSheet`, and `DmcaReportDialog`.
 - [x] **Web Preview & Android Emulator Launch:** Verified live Android Emulator (`emulator-5554`) launch with live Google Maps tiles and zero authorization errors; enabled Flutter Web preview (`http://127.0.0.1:8088/#/map`) with gitignored `web/env_config.js` Maps JS loader and `kIsWeb` platform guards.
 - [x] **Pre-Commit Verification Gate:** `build_runner` (0 errors), `flutter analyze --fatal-infos` (0 issues), `flutter test` (**32/32 passed**), `functions` Jest (**25/25 passed**), and Compliance/Secret/Architecture scans (**0 hardcoded secrets, 0 banned Apple 1.4.4 strings, 0 layer violations**).
+- [x] **GitHub Sync:** Connected `origin` (`https://github.com/phillipjames33/crimemaps.git`) and pushed `main` with zero tracked secret files.
 
 ### External Service & Key Setup (Stored Locally in Gitignored `.env`)
 - [x] **Google Cloud (`crimemaps-515702`):** Enabled Maps SDK for Android, Maps SDK for iOS, Maps JavaScript API, Street View Static API, and Map Tiles API; created `GOOGLE_MAPS_API_KEY` and Android `GOOGLE_MAPS_MAP_ID` (`85079358df0fab979e47647c`).
