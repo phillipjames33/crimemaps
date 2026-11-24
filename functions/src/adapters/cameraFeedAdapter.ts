@@ -233,6 +233,7 @@ export class OverpassCameraFeedAdapter implements CameraFeedAdapter {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         Accept: 'application/json',
+        'User-Agent': 'CrimeMapsCivicTransparency/1.0',
       },
       body,
     });

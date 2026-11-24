@@ -20,6 +20,7 @@ import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onObjectFinalized } from 'firebase-functions/v2/storage';
 import { createCameraFeedAdapters } from './adapters/cameraFeedAdapter';
 import { createCrimeFeedAdapters } from './adapters/crimeFeedAdapter';
+import { buildSeedTerritories, buildSeedTracks } from './data/mockSeed';
 import { runIngestCrimeFeeds } from './handlers/ingestCrimeFeeds';
 import { runHighSeverityIncident } from './handlers/onHighSeverityIncident';
 import { runOnTrackUploaded, StorageQuarantineOps } from './handlers/onTrackUploaded';
@@ -40,18 +41,24 @@ const socrataAppTokenSecret = defineSecret('SOCRATA_APP_TOKEN');
 const arcgisTokenSecret = defineSecret('ARCGIS_TOKEN');
 const deflockApiKeySecret = defineSecret('DEFLOCK_API_KEY');
 
+function isUsableSecret(val: unknown): val is string {
+  if (typeof val !== 'string') return false;
+  const trimmed = val.trim();
+  return trimmed.length > 0 && !trimmed.toLowerCase().startsWith('placeholder');
+}
+
 function readSecretOrEnv(
   secret: ReturnType<typeof defineSecret>,
   envKey: string,
 ): string | undefined {
   try {
     const val = secret.value();
-    if (typeof val === 'string' && val.trim().length > 0) return val.trim();
+    if (isUsableSecret(val)) return val.trim();
   } catch {
     // Fallback to process.env in local emulator / test environments.
   }
   const envVal = process.env[envKey];
-  return typeof envVal === 'string' && envVal.trim().length > 0 ? envVal.trim() : undefined;
+  return isUsableSecret(envVal) ? envVal.trim() : undefined;
 }
 
 const gcsQuarantineOps: StorageQuarantineOps = {
@@ -76,7 +83,9 @@ export const ingestCrimeFeeds = onSchedule(
     const app = ensureAdminApp();
     const db = getFirestore(app);
     const now = new Date();
-    const since = new Date(now.getTime() - 48 * 60 * 60 * 1000);
+    // 14-day lookback captures municipal Socrata/ArcGIS portals with 3-10 day reporting lags;
+    // deterministic IDs guarantee zero duplicates across overlapping runs.
+    const since = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
 
     const adapters = createCrimeFeedAdapters({
       useMockData: useMockDataParam.value(),
@@ -90,6 +99,29 @@ export const ingestCrimeFeeds = onSchedule(
     });
 
     await runIngestCrimeFeeds({ db, adapters, since, now, logger });
+
+    // Idempotent first-run bootstrap: ensure historical territories and baseline
+    // royalty-free indie tracks exist in Firestore if those collections are empty.
+    const [terrSnap, trackSnap] = await Promise.all([
+      db.collection('territories').limit(1).get(),
+      db.collection('tracks').limit(1).get(),
+    ]);
+    if (terrSnap.empty) {
+      const batch = db.batch();
+      for (const territory of buildSeedTerritories(now)) {
+        batch.set(db.collection('territories').doc(territory.id), territory, { merge: true });
+      }
+      await batch.commit();
+      logger.info('Bootstrapped baseline historical territories collection.');
+    }
+    if (trackSnap.empty) {
+      const batch = db.batch();
+      for (const track of buildSeedTracks(now)) {
+        batch.set(db.collection('tracks').doc(track.id), track, { merge: true });
+      }
+      await batch.commit();
+      logger.info('Bootstrapped baseline royalty-free indie tracks collection.');
+    }
   },
 );
 

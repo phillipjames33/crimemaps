@@ -8,7 +8,7 @@
 import type { Messaging, TopicMessage } from 'firebase-admin/messaging';
 import { HIGH_SEVERITY_LEVELS, IncidentSeverity } from '../types';
 import { geohashTopicPrefixes, slugify } from '../utils/geohash';
-import { asRecord, readString } from '../utils/json';
+import { asRecord, readDate, readString } from '../utils/json';
 import { LoggerLike } from './ingestCrimeFeeds';
 
 export interface MessagingLike {
@@ -80,6 +80,21 @@ export async function runHighSeverityIncident(
       sentCount: 0,
       failedTopics: [],
     };
+  }
+
+  // Skip real-time FCM push notifications for historical backfill records older than 24h.
+  const occurredAt = readDate(data, 'occurredAt');
+  if (occurredAt !== null) {
+    const ageMs = Date.now() - occurredAt.getTime();
+    if (ageMs > 24 * 60 * 60 * 1000) {
+      return {
+        dispatched: false,
+        reason: 'historical_backfill',
+        topics: [],
+        sentCount: 0,
+        failedTopics: [],
+      };
+    }
   }
 
   const geo = asRecord(data['geo']);

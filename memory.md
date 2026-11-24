@@ -35,7 +35,12 @@
   - `onHighSeverityIncident` (`us-central1`, Firestore trigger) — FCM push notifications to `geo_`, `city_`, `state_` topics.
   - `onTrackUploaded` (`us-east1`, Storage bucket trigger) — MIME/size/warranty validation, track activation or quarantine.
   - `submitMugshotRemoval` (`us-central1`, HTTPS callable) — 100% free instant redaction of `allegedOffender` pending verification.
-- [x] Verified live free municipal Socrata Open Data crime feeds (Chicago PD `ijzp-q8t2` and San Francisco PD `wg3w-h783` returning live 2026 JSON) and documented ready-to-deploy config in `functions/.env.live.example`.
+- [x] **Live Production Data Ingestion Verified (`crimemaps-515702` — `USE_MOCK_DATA=false`):**
+  - Activated live free 2026 municipal Socrata crime feeds (**Chicago PD `ijzp-q8t2`** + **San Francisco PD `wg3w-h783`**) with a 14-day lookback window and idempotent deterministic IDs, plus a 24-hour recency guard in `onHighSeverityIncident` so historical backfills do not spam FCM push notifications.
+  - Activated live **OpenStreetMap Overpass** Atlanta Metro civic camera sync (`syncPublicCameras`) with compliant `User-Agent` header and anti-doxxing filter.
+  - Added `San Francisco, CA` city preset to `MapController.cityPresets` and added placeholder-secret filtering in `readSecretOrEnv` (`functions/src/index.ts`).
+  - Verified live production Firestore collections on `crimemaps-515702`: **174 live `incidents`** (**98** Chicago PD + **63** San Francisco PD + **13** Atlanta/GA/US baseline), **300+ live OSM `cameras`** across Atlanta Metro, **4 historical `territories`**, and **6 active royalty-free `tracks`**.
+  - Verified end-to-end live Firestore streaming in Flutter Web (`http://127.0.0.1:8088/#/map` with `USE_MOCK_DATA=false`): `5 Incidents • Atlanta, GA` + `2 Historical Context` and `63 Incidents • San Francisco, CA` (live SFPD street intersections) streamed via Firestore `Listen/channel` with HTTP 200 and zero permission errors.
 - [x] Built Firestore CLI seeder (`functions/src/seed/seedFirestore.ts`) and verified seeding against the local Firebase Emulator Suite (`14` incidents, `7` public cameras with `2` private residential cameras blocked, `4` historical territories, `6` indie tracks).
 - [x] Configured Artifact Registry 1-day container cleanup policy across `us-central1` and `us-east1`.
 
@@ -70,8 +75,8 @@ Everything buildable and verifiable in code, tests, Cloud Functions, security ru
    - [ ] Upload Google Play Service Account JSON to RevenueCat `Crime Maps Android` (`app4470811710`).
 2. **Google AdMob Production IDs:**
    - [ ] Complete AdMob reactivation review (`phillipojames@gmail.com`), create production Android & iOS AdMob apps + Banner Ad Unit, and replace Google's test IDs in release `.env`.
-3. **Production Live Data Mode Switch (When Ready):**
-   - [ ] Copy desired live Socrata/OSM config from `functions/.env.live.example` into `functions/.env.crimemaps-515702`, optionally set real Secret Manager API keys (`SPOTCRIME_API_KEY`, `SOCRATA_APP_TOKEN`, `ARCGIS_TOKEN`, `DEFLOCK_API_KEY`), run `firebase deploy --project crimemaps-515702 --only functions`, and flip `USE_MOCK_DATA=false` in `.env`.
+3. **Optional Paid Feeds & App Check (Before Store Submission):**
+   - [ ] Optionally replace Secret Manager placeholders (`SPOTCRIME_API_KEY`, `SOCRATA_APP_TOKEN`, `ARCGIS_TOKEN`, `DEFLOCK_API_KEY`) if adding higher-rate or paid commercial feeds.
    - [ ] Enable Apple Sign-In provider & Firebase App Check in Firebase Console before App Store review.
 4. **Signed Store Release Artifacts:**
    - [ ] Generate your private Android upload keystore (`keytool`), create local gitignored `android/key.properties` from `android/key.properties.example`, and build `flutter build appbundle --release --dart-define-from-file=.env`.
