@@ -52,16 +52,23 @@
 - [x] **Module E (Monetization, FCM & Compliance):** RevenueCat v9 Free vs Pro paywall (`PaywallScreen`), `FreeTierAdBanner` (auto-hidden for Pro), custom geofence & FCM topic manager, `ArtistBoostSheet`, 100% free `MugshotRemovalSheet`, and `DmcaReportDialog`.
 - [x] **Firebase Auth UI (`lib/features/auth/`):** `AppUser`, `AuthRepository`, `FirebaseAuthRepository` (Email/Password, Google, Apple, Password Reset + `users/{uid}` Firestore profile sync with offline mock fallback), `AuthController`, `AuthSheet` (preserving guest browsing & 100% free record removal), and `AccountActionChip`.
 - [x] **Documentation & Store Review Materials:** Authored comprehensive `README.md` and copy-paste App Store / Google Play compliance review notes (`docs/APP_STORE_COMPLIANCE.md`).
-- [x] **Release Build Verification:**
+- [x] **Custom App Icon & Dark Launch Splash Screen (Android, iOS & Web):**
+  - Rendered and installed custom dark car-navigation Crime Maps emblem across all 5 Android `mipmap-*` densities, all 15 opaque 24-bit RGB iOS `AppIcon.appiconset` sizes (`20x20` to `1024x1024`), and all 5 Web icons/favicons (`web/manifest.json` theme `#0B0F17`).
+  - Configured `#0B0F17` dark Android launch background with centered `splash_logo.png` (`drawable/launch_background.xml` & `drawable-v21/launch_background.xml`).
+- [x] **Release Build Verification & Signed Google Play `.aab`:**
   - Verified live Android Emulator (`emulator-5554`) launch + live Flutter Web preview (`http://127.0.0.1:8088/#/map`).
-  - Built production **Android Release APK** (`build/app/outputs/flutter-apk/app-release.apk`, `60.8 MB`) cleanly with official Firebase `google-services.json`, live Maps API key, and live RevenueCat SDK.
-  - Built production **Flutter Web Release Bundle** (`build/web/`).
+  - Generated local gitignored 2048-bit RSA Android upload keystore (`android/upload-keystore.jks` + `android/key.properties`), registered release SHA-1 (`26:A4:B0:0A:37:BD:D5:D3:2A:E4:0D:29:79:9A:55:21:F2:49:C9:FD`) & SHA-256 on Firebase Android app `1:864680228535:android:763df22703a56cfa757f32`, and refreshed `android/app/google-services.json`.
+  - Built & verified signed **Google Play App Bundle:** `build/app/outputs/bundle/release/app-release.aab` (`53.3 MB`, `jarsigner -verify` passed) with `USE_MOCK_DATA=false`, custom icon/splash, and live Firebase/Maps/RevenueCat keys.
+  - Built production **Android Release APK** (`build/app/outputs/flutter-apk/app-release.apk`, `60.8 MB`) and **Flutter Web Release Bundle** (`build/web/`).
 - [x] **Pre-Commit Verification Gate:** `build_runner` (0 errors), `flutter analyze --fatal-infos` (0 issues), `flutter test` (**35/35 passed**), `functions` build & Jest (**25/25 passed**), and Compliance/Secret/Architecture scans (**0 hardcoded secrets, 0 banned Apple 1.4.4 strings, 0 layer violations, 0 tracked secret files**).
 
 ### External Services & Key Setup (All Secrets Kept Locally in Gitignored Files)
 - [x] **Google Cloud (`crimemaps-515702`):** Enabled all 5 Maps APIs; restricted `Maps Platform API Key` to **only those 5 Maps APIs**; created & published Dark Map Style **`Crime Maps Dark Car-Nav`** (`4daefcf00649c519c8e4111b`) and attached it to Map ID `85079358df0fab979e47647c`.
 - [x] **Firebase (`crimemaps-515702` — Blaze Active & Deployed):** Enabled Authentication (Email/Password + Google), Cloud Firestore (`nam5`), Firebase Storage (`US-EAST1`), Secret Manager entries, and all 5 Cloud Functions v2; downloaded official gitignored `android/app/google-services.json` and `ios/Runner/GoogleService-Info.plist` via Firebase CLI and saved Web config to local `.env`.
-- [x] **RevenueCat (`CrimeMapsAi` / `proj3c8fa1e5`):** Created `Crime Maps Android` (`com.crimemaps.crime_maps`) and `Crime Maps iOS` (`com.crimemaps.crimeMaps`, reusing Apple IAP key `H2Q4Y496N5`); saved both public SDK keys to local `.env`.
+- [x] **RevenueCat (`CrimeMapsAi` / `proj3c8fa1e5`):**
+  - Created `Crime Maps Android` (`com.crimemaps.crime_maps`) and `Crime Maps iOS` (`com.crimemaps.crimeMaps`, reusing Apple IAP key `H2Q4Y496N5`); saved both public SDK keys to local `.env`.
+  - Created **`pro_access`** entitlement (`entlab0724eb2e`) with 6 attached products across Android, iOS, and Test Store.
+  - Registered all 10 Android & iOS product IDs (`pro_monthly`, `pro_annual`, `boost_24h_zip`, `boost_7d_city`, `boost_30d_metro`) and configured **`default`** Current Offering (`ofrng4d0aa6f57c`) with `$rc_monthly` and `$rc_annual`.
 - [x] **Google AdMob:** Configured official Google test AdMob IDs in `.env` for dev/emulator safety.
 
 ---
@@ -70,15 +77,15 @@
 
 Everything buildable and verifiable in code, tests, Cloud Functions, security rules, and release artifacts is **complete**. The remaining checklist items require store console accounts, signing keys, or optional paid subscriptions owned by you:
 
-1. **Google Play & App Store Subscriptions (RevenueCat):**
-   - [ ] Create matching subscriptions (`pro_monthly`, `pro_annual`) and Artist Boost consumables (`boost_24h_zip`, `boost_7d_city`, `boost_30d_metro`) in Google Play Console & App Store Connect and link them to RevenueCat entitlement `pro_access`.
-   - [ ] Upload Google Play Service Account JSON to RevenueCat `Crime Maps Android` (`app4470811710`).
+1. **Google Play Console & App Store Connect Store Sync:**
+   - [ ] Upload `build/app/outputs/bundle/release/app-release.aab` to Google Play Console (Internal Testing / Production track) using review notes from `docs/APP_STORE_COMPLIANCE.md`.
+   - [ ] Create matching subscription/IAP SKUs (`pro_monthly`, `pro_annual`, `boost_24h_zip`, `boost_7d_city`, `boost_30d_metro`) in Google Play Console & App Store Connect, and upload your Google Play Service Account JSON to RevenueCat `Crime Maps Android` (`app4470811710`).
 2. **Google AdMob Production IDs:**
    - [ ] Complete AdMob reactivation review (`phillipojames@gmail.com`), create production Android & iOS AdMob apps + Banner Ad Unit, and replace Google's test IDs in release `.env`.
-3. **Optional Paid Feeds & App Check (Before Store Submission):**
+3. **Optional Paid Feeds & App Check (Before Public Store Launch):**
    - [ ] Optionally replace Secret Manager placeholders (`SPOTCRIME_API_KEY`, `SOCRATA_APP_TOKEN`, `ARCGIS_TOKEN`, `DEFLOCK_API_KEY`) if adding higher-rate or paid commercial feeds.
    - [ ] Enable Apple Sign-In provider & Firebase App Check in Firebase Console before App Store review.
-4. **Signed Store Release Artifacts:**
-   - [ ] Generate your private Android upload keystore (`keytool`), create local gitignored `android/key.properties` from `android/key.properties.example`, and build `flutter build appbundle --release --dart-define-from-file=.env`.
+4. **macOS / Xcode iOS Archive & Final Key Restrictions:**
+   - [ ] Back up local gitignored `android/upload-keystore.jks` and `android/key.properties` safely outside the repo (required for all future Google Play updates!).
    - [ ] On macOS/Xcode: create local gitignored `ios/Flutter/Secrets.xcconfig` from `ios/Flutter/Secrets.xcconfig.example`, run `cd ios && pod install`, archive via Xcode, and attach review notes from `docs/APP_STORE_COMPLIANCE.md`.
-   - [ ] Add final release SHA-1 / iOS Bundle ID / web domain application restrictions to `Maps Platform API Key` once store signing certificates are finalized.
+   - [ ] Add final release SHA-1 (`26:A4:B0:0A:37:BD:D5:D3:2A:E4:0D:29:79:9A:55:21:F2:49:C9:FD`) / Play App Signing SHA-1 / iOS Bundle ID restrictions to `Maps Platform API Key` once store signing is finalized.

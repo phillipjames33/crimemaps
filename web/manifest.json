@@ -1,11 +1,11 @@
 {
-    "name": "crime_maps",
-    "short_name": "crime_maps",
+    "name": "Crime Maps",
+    "short_name": "Crime Maps",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#0B0F17",
+    "theme_color": "#0B0F17",
+    "description": "Real-time civic situational awareness, public camera transparency, and hyper-local independent music streaming.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
