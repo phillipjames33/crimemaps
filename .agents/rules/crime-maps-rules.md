@@ -93,3 +93,7 @@ Run a quick grep check across `lib/` and `functions/src/` before committing:
 - Use **Conventional Commits** (`feat(map): ...`, `fix(radar): ...`, `chore(compliance): ...`).
 - Never force-push (`git push --force`) or delete branches without explicit confirmation.
 - If any check in Steps 1–4 fails, fix the root cause and re-run the entire gate from Step 1 before committing.
+
+### Living Project Memory (`memory.md`)
+- Maintain [memory.md](../../memory.md) in the repository root as the source of truth for completed work and remaining tasks.
+- Whenever a feature, external integration, compliance update, or deployment milestone is completed (or new blockers/tasks arise), update `memory.md` in the same commit. Never write API keys, tokens, or secrets into `memory.md`.
