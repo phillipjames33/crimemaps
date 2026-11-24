@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/config/compliance_constants.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../auth/presentation/auth_sheet.dart';
 import '../../geo_radio/domain/track_model.dart';
 import '../../monetization/presentation/artist_boost_sheet.dart';
 import '../domain/track_upload_request.dart';
@@ -256,8 +257,9 @@ class _CreatorPortalScreenState extends ConsumerState<CreatorPortalScreen> {
           ],
         ),
         actions: <Widget>[
+          const AccountActionChip(),
           Container(
-            margin: const EdgeInsets.only(right: 16),
+            margin: const EdgeInsets.only(right: 12),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: AppTheme.accentPurple.withValues(alpha: 0.15),

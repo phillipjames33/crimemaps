@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../auth/presentation/auth_sheet.dart';
 import '../domain/subscription_tier.dart';
 import 'monetization_controller.dart';
 
@@ -185,6 +186,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               style: TextStyle(color: AppTheme.accentCyan),
             ),
           ),
+          const AccountActionChip(),
         ],
       ),
       body: stateAsync.when(

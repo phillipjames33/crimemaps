@@ -44,12 +44,14 @@
 - [x] **Module C (Civic Camera Radar):** Local Hive CE spatial cache (`LocalCameraCache`) keyed by geohash cell (zero Firestore polling on GPS ticks), Haversine proximity engine (`CameraRadarController`), animated `"Entering ALPR / Public Camera Zone"` banner, audio chime ducking, anonymized residential density circles, and anti-doxxing public camera report form.
 - [x] **Module D (Indie Geo-Radio & Creator Portal):** Persistent `just_audio` + `audio_service` mini-player docked above the 5-tab `StatefulShellRoute` shell, map-to-radio city sync via `ref.listen`, city/genre discovery tab with one-click DMCA reporting, and `CreatorPortalScreen` enforcing 100% ownership warranty checkbox + typed legal signature before upload.
 - [x] **Module E (Monetization, FCM & Compliance):** RevenueCat v9 Free vs Pro paywall (`PaywallScreen`), `FreeTierAdBanner` (auto-hidden for Pro), custom geofence & FCM topic manager, `ArtistBoostSheet`, 100% free `MugshotRemovalSheet`, and `DmcaReportDialog`.
+- [x] **Firebase Auth UI (`lib/features/auth/`):** Implemented immutable `AppUser`, `AuthRepository`, `FirebaseAuthRepository` (Email/Password, Google, Apple, Password Reset + `users/{uid}` Firestore profile sync with offline mock fallback), `AuthController`, `AuthSheet` (explicitly preserving guest access for map browsing and 100% free record removal), and `AccountActionChip` across Creator, Pro, and Radar screens.
 - [x] **Web Preview & Android Emulator Launch:** Verified live Android Emulator (`emulator-5554`) launch with live Google Maps tiles and zero authorization errors; enabled Flutter Web preview (`http://127.0.0.1:8088/#/map`) with gitignored `web/env_config.js` Maps JS loader and `kIsWeb` platform guards.
-- [x] **Pre-Commit Verification Gate:** `build_runner` (0 errors), `flutter analyze --fatal-infos` (0 issues), `flutter test` (**32/32 passed**), `functions` Jest (**25/25 passed**), and Compliance/Secret/Architecture scans (**0 hardcoded secrets, 0 banned Apple 1.4.4 strings, 0 layer violations**).
+- [x] **Pre-Commit Verification Gate:** `build_runner` (0 errors), `flutter analyze --fatal-infos` (0 issues), `flutter test` (**35/35 passed**), `functions` Jest (**25/25 passed**), and Compliance/Secret/Architecture scans (**0 hardcoded secrets, 0 banned Apple 1.4.4 strings, 0 layer violations**).
 - [x] **GitHub Sync:** Connected `origin` (`https://github.com/phillipjames33/crimemaps.git`) and pushed `main` with zero tracked secret files.
 
 ### External Service & Key Setup (Stored Locally in Gitignored `.env`)
 - [x] **Google Cloud (`crimemaps-515702`):** Enabled Maps SDK for Android, Maps SDK for iOS, Maps JavaScript API, Street View Static API, and Map Tiles API; created `GOOGLE_MAPS_API_KEY` and Android `GOOGLE_MAPS_MAP_ID` (`85079358df0fab979e47647c`).
+- [x] **Firebase (`crimemaps-515702` — Blaze Active):** Provisioned Firebase on `crimemaps-515702`; enabled Authentication (**Email/Password** + **Google**), Cloud Firestore (`nam5`, production mode), and Firebase Storage (`gs://crimemaps-515702.firebasestorage.app`, `US-EAST1`, production mode); registered Web (`1:864680228535:web:d59629693cb445b1757f32`), Android (`com.crimemaps.crime_maps` with debug SHA-1), and iOS (`com.crimemaps.crimeMaps`) apps; saved Firebase Web config to local `.env` and updated `.firebaserc`.
 - [x] **RevenueCat (`CrimeMapsAi` / `proj3c8fa1e5`):** Created `Crime Maps Android` (`com.crimemaps.crime_maps`) and `Crime Maps iOS` (`com.crimemaps.crimeMaps`, reusing Apple IAP key `H2Q4Y496N5`); saved both public SDK keys to local `.env`.
 - [x] **Google AdMob:** Configured official Google test AdMob App IDs & Banner Unit ID in `.env` for safe dev/emulator testing.
 
@@ -58,14 +60,15 @@
 ## 2. What Still Needs to Be Completed
 
 ### Security & Production Backend Provisioning
+- [ ] **Re-auth Firebase CLI & Deploy Backend to `crimemaps-515702`:**
+  - [ ] Run `firebase login --reauth` to refresh the expired CLI OAuth token.
+  - [ ] Deploy rules, indexes, and all 5 Cloud Functions v2: `firebase deploy --project crimemaps-515702 --only firestore:rules,firestore:indexes,storage,functions`.
+  - [ ] Optionally seed production/staging Firestore or configure live `CRIME_FEED_SOURCES` / `CAMERA_FEED_SOURCES` and Secret Manager keys (`SPOTCRIME_API_KEY`, `SOCRATA_APP_TOKEN`, `ARCGIS_TOKEN`, `DEFLOCK_API_KEY`).
+  - [ ] Add `com.google.gms.google-services` Gradle plugin to Android build once `android/app/google-services.json` is verified locally, and download `ios/Runner/GoogleService-Info.plist` from Firebase Console for iOS builds.
+  - [ ] Enable Apple Sign-In provider & Firebase App Check in Firebase Console before App Store release.
+  - [ ] Switch `USE_MOCK_DATA=false` in `.env` once production data & functions are deployed.
 - [ ] **Restrict Google Maps API Key:** In Google Cloud Console (`crimemaps-515702` → Maps Platform → Credentials), restrict `Maps Platform API Key` to only the 5 enabled Maps APIs and your Android SHA-1 / iOS Bundle ID / Web referrer restrictions before release.
 - [ ] **Attach Dark Cloud Map Style (Optional):** Bind a dark map style to Cloud Map ID `85079358df0fab979e47647c` in Google Maps Studio (or leave `GOOGLE_MAPS_MAP_ID` blank to use the bundled `assets/map_styles/dark_car_nav.json`).
-- [ ] **Firebase Production Project Setup:**
-  - [ ] Link Firebase project to `crimemaps-515702` (or create a dedicated Firebase project) and run `flutterfire configure` to generate local `firebase_options.dart`, `android/app/google-services.json`, and `ios/Runner/GoogleService-Info.plist`.
-  - [ ] Enable Firebase Auth providers (Email/Password, Google Sign-In, Apple Sign-In), Firestore Database, Firebase Storage, Cloud Messaging, and Firebase App Check.
-  - [ ] Provision production secrets in Firebase Secret Manager (`firebase functions:secrets:set SPOTCRIME_API_KEY`, `SOCRATA_APP_TOKEN`, `ARCGIS_TOKEN`, `DEFLOCK_API_KEY`).
-  - [ ] Deploy rules, indexes, and Cloud Functions v2 (`firebase deploy --only firestore:rules,firestore:indexes,storage,functions`).
-  - [ ] Switch `USE_MOCK_DATA=false` in production `.env` / CI build configs once live Firestore & feeds are active.
 
 ### Live Data Feeds (Post-MVP / Production)
 - [ ] **Municipal Open Data Crime Feeds (Free):** Configure `CRIME_FEED_SOURCES` with live Socrata/ArcGIS endpoints (e.g., Atlanta PD, Chicago PD, LAPD open data portals) in Cloud Functions runtime config.

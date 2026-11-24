@@ -31,6 +31,38 @@ class AppEnv {
     'ADMOB_BANNER_UNIT_ID',
   );
 
+  static const String firebaseApiKey = String.fromEnvironment(
+    'FIREBASE_API_KEY',
+  );
+
+  static const String firebaseAppId = String.fromEnvironment(
+    'FIREBASE_APP_ID',
+  );
+
+  static const String firebaseMessagingSenderId = String.fromEnvironment(
+    'FIREBASE_MESSAGING_SENDER_ID',
+  );
+
+  static const String firebaseProjectId = String.fromEnvironment(
+    'FIREBASE_PROJECT_ID',
+    defaultValue: 'crimemaps-515702',
+  );
+
+  static const String firebaseStorageBucket = String.fromEnvironment(
+    'FIREBASE_STORAGE_BUCKET',
+  );
+
+  static const String firebaseAuthDomain = String.fromEnvironment(
+    'FIREBASE_AUTH_DOMAIN',
+  );
+
+  static bool get hasFirebaseWebOptions =>
+      firebaseApiKey.isNotEmpty &&
+      !firebaseApiKey.startsWith('your_') &&
+      firebaseAppId.isNotEmpty &&
+      firebaseMessagingSenderId.isNotEmpty &&
+      firebaseProjectId.isNotEmpty;
+
   /// Defaults to true so the app runs out-of-the-box with realistic seeded data
   /// on emulators/simulators without requiring live API keys.
   static const bool useMockData = bool.fromEnvironment(

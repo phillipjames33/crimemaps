@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/config/compliance_constants.dart';
 import '../../../core/geo/geohash_util.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../auth/presentation/auth_sheet.dart';
 import '../domain/camera_model.dart';
 import 'camera_radar_controller.dart';
 import 'widgets/camera_alert_banner.dart';
@@ -17,6 +18,9 @@ class CameraRadarScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(ComplianceConstants.cameraRadarTitle),
+        actions: const <Widget>[
+          AccountActionChip(),
+        ],
       ),
       body: const Column(
         children: <Widget>[
