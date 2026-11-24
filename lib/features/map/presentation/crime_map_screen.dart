@@ -10,9 +10,11 @@ import '../../../core/geo/location_service.dart';
 import '../../../core/mock/seed_data.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../camera_radar/domain/camera_model.dart';
+import '../../camera_radar/presentation/camera_map_providers.dart';
 import '../../incidents/domain/incident_model.dart';
 import '../../incidents/domain/incident_repository.dart';
 import '../../incidents/presentation/incident_providers.dart';
+import '../../incidents/presentation/saved_incidents_controller.dart';
 import '../../incidents/presentation/widgets/incident_detail_sheet.dart';
 import '../../territories/domain/territory_model.dart';
 import '../../territories/presentation/territory_providers.dart';
@@ -52,6 +54,7 @@ class _CrimeMapScreenState extends ConsumerState<CrimeMapScreen> {
   String? _darkMapStyle;
   double _renderedZoom = 13.5;
   bool _isUpdatingFromGesture = false;
+  bool _showSavedOnly = false;
 
   @override
   void initState() {
@@ -336,6 +339,10 @@ class _CrimeMapScreenState extends ConsumerState<CrimeMapScreen> {
     final viewport = ref.watch(mapControllerProvider);
     final incidentsAsync = ref.watch(scopedIncidentsProvider);
     final territoriesAsync = ref.watch(territoriesForAreaProvider);
+    final savedIncidentIds = ref.watch(savedIncidentsControllerProvider);
+    final camerasAsync = widget.cameras == null
+        ? ref.watch(camerasForMapViewportProvider)
+        : AsyncValue<List<PublicCamera>>.data(widget.cameras!);
 
     ref.listen<MapViewportState>(mapControllerProvider,
         (MapViewportState? previous, MapViewportState next) {
@@ -365,11 +372,26 @@ class _CrimeMapScreenState extends ConsumerState<CrimeMapScreen> {
       });
     });
 
-    final incidents = incidentsAsync.when(
+    final allIncidents = incidentsAsync.when(
       data: (List<Incident> data) => data,
       loading: () => const <Incident>[],
       error: (Object error, StackTrace stackTrace) => const <Incident>[],
     );
+
+    final bool effectiveSavedOnly =
+        _showSavedOnly && savedIncidentIds.isNotEmpty;
+    final incidents = effectiveSavedOnly
+        ? allIncidents
+            .where((Incident i) => savedIncidentIds.contains(i.id))
+            .toList(growable: false)
+        : allIncidents;
+    final filteredIncidentsAsync = effectiveSavedOnly
+        ? incidentsAsync.whenData(
+            (List<Incident> list) => list
+                .where((Incident i) => savedIncidentIds.contains(i.id))
+                .toList(growable: false),
+          )
+        : incidentsAsync;
 
     final territories = territoriesAsync.when(
       data: (List<Territory> data) => data,
@@ -377,15 +399,11 @@ class _CrimeMapScreenState extends ConsumerState<CrimeMapScreen> {
       error: (Object error, StackTrace stackTrace) => const <Territory>[],
     );
 
-    final activeCameras = (widget.cameras ?? SeedData.buildSeedCameras())
-        .where((PublicCamera cam) {
-      if (viewport.scope == MapScope.state) {
-        return cam.stateCode.toUpperCase() ==
-            viewport.activeStateCode.toUpperCase();
-      }
-      return cam.citySlug.toLowerCase() ==
-          viewport.activeCitySlug.toLowerCase();
-    }).toList();
+    final activeCameras = camerasAsync.when(
+      data: (List<PublicCamera> data) => data,
+      loading: () => const <PublicCamera>[],
+      error: (Object error, StackTrace stackTrace) => const <PublicCamera>[],
+    );
 
     final densityCells =
         widget.densityCells ?? SeedData.buildSeedResidentialDensityCells();
@@ -448,9 +466,18 @@ class _CrimeMapScreenState extends ConsumerState<CrimeMapScreen> {
       child: SafeArea(
         top: false,
         child: _IncidentPeekCarousel(
-          incidentsAsync: incidentsAsync,
+          incidentsAsync: filteredIncidentsAsync,
           territories: territories,
           showTerritories: viewport.showTerritoriesLayer,
+          showCameras: viewport.showCamerasLayer,
+          cameraCount: activeCameras.length,
+          savedIncidentIds: savedIncidentIds,
+          showSavedOnly: effectiveSavedOnly,
+          onToggleSavedOnly: () {
+            setState(() {
+              _showSavedOnly = !_showSavedOnly;
+            });
+          },
           activeScopeLabel: _scopeSummaryLabel(viewport),
           onTapIncident: _openIncidentSheet,
           onTapTerritory: _openTerritorySheet,
@@ -515,6 +542,11 @@ class _IncidentPeekCarousel extends StatelessWidget {
     required this.incidentsAsync,
     required this.territories,
     required this.showTerritories,
+    required this.showCameras,
+    required this.cameraCount,
+    required this.savedIncidentIds,
+    required this.showSavedOnly,
+    required this.onToggleSavedOnly,
     required this.activeScopeLabel,
     required this.onTapIncident,
     required this.onTapTerritory,
@@ -523,6 +555,11 @@ class _IncidentPeekCarousel extends StatelessWidget {
   final AsyncValue<List<Incident>> incidentsAsync;
   final List<Territory> territories;
   final bool showTerritories;
+  final bool showCameras;
+  final int cameraCount;
+  final Set<String> savedIncidentIds;
+  final bool showSavedOnly;
+  final VoidCallback onToggleSavedOnly;
   final String activeScopeLabel;
   final void Function(Incident incident) onTapIncident;
   final void Function(Territory territory) onTapTerritory;
@@ -559,7 +596,8 @@ class _IncidentPeekCarousel extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Padding(
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 14),
             child: Row(
               children: <Widget>[
@@ -597,8 +635,86 @@ class _IncidentPeekCarousel extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Spacer(),
-                if (showTerritories && territories.isNotEmpty)
+                if (showCameras && cameraCount > 0) ...<Widget>[
+                  const SizedBox(width: 8),
+                  Container(
+                    key: const Key('map_camera_count_pill'),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppTheme.accentCyan.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: AppTheme.accentCyan.withValues(alpha: 0.45),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        const Icon(
+                          Icons.videocam_outlined,
+                          size: 13,
+                          color: AppTheme.accentCyan,
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          '$cameraCount Civic Cameras',
+                          style: const TextStyle(
+                            color: AppTheme.accentCyan,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                if (savedIncidentIds.isNotEmpty) ...<Widget>[
+                  const SizedBox(width: 8),
+                  InkWell(
+                    key: const Key('map_saved_filter_chip'),
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: onToggleSavedOnly,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: showSavedOnly
+                            ? AppTheme.accentAmber.withValues(alpha: 0.28)
+                            : AppTheme.surfaceDark.withValues(alpha: 0.94),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: showSavedOnly
+                              ? AppTheme.accentAmber
+                              : AppTheme.accentAmber.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          const Icon(
+                            Icons.bookmark_rounded,
+                            size: 13,
+                            color: AppTheme.accentAmber,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'Saved (${savedIncidentIds.length})',
+                            style: const TextStyle(
+                              color: AppTheme.accentAmber,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+                if (showTerritories && territories.isNotEmpty) ...<Widget>[
+                  const SizedBox(width: 8),
                   InkWell(
                     borderRadius: BorderRadius.circular(14),
                     onTap: () => onTapTerritory(territories.first),
@@ -635,6 +751,7 @@ class _IncidentPeekCarousel extends StatelessWidget {
                       ),
                     ),
                   ),
+                ],
               ],
             ),
           ),
@@ -752,6 +869,15 @@ class _IncidentPeekCarousel extends StatelessWidget {
                                         fontSize: 9.5,
                                         fontWeight: FontWeight.w700,
                                       ),
+                                    ),
+                                  ),
+                                if (savedIncidentIds.contains(incident.id))
+                                  const Padding(
+                                    padding: EdgeInsets.only(right: 4),
+                                    child: Icon(
+                                      Icons.bookmark_rounded,
+                                      size: 12,
+                                      color: AppTheme.accentAmber,
                                     ),
                                   ),
                                 Expanded(

@@ -66,6 +66,7 @@ ui-debug.log
 
 # Generated local web config (reads API keys from .env; never commit)
 web/env_config.js
+hosting/app/
 
 # Android release signing credentials (never commit)
 android/key.properties

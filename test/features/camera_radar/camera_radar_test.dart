@@ -48,6 +48,21 @@ class _CountingCameraRepository implements CameraRepository {
   }
 
   @override
+  Future<List<PublicCamera>> fetchCamerasForArea({
+    required String citySlug,
+    required String stateCode,
+    required bool stateScope,
+    int limit = 150,
+  }) {
+    return _delegate.fetchCamerasForArea(
+      citySlug: citySlug,
+      stateCode: stateCode,
+      stateScope: stateScope,
+      limit: limit,
+    );
+  }
+
+  @override
   Future<List<ResidentialDensityCell>> fetchResidentialDensityCells({
     String? citySlug,
   }) {

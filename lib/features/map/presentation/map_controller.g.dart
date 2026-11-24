@@ -6,7 +6,7 @@ part of 'map_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$mapControllerHash() => r'e8cfc47b52c15cc2152d2a58e11712e390c8c54c';
+String _$mapControllerHash() => r'4fb364a03dd4cbc1a0281b1c5743f814ed8c084d';
 
 /// Manages car-navigation map viewport state, scope switching (`area`/`city`/`state`),
 /// city quick-jump presets, search filtering, and overlay layer toggles.

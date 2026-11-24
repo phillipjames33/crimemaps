@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -9,12 +10,13 @@ import '../../../../core/config/app_env.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../map/presentation/widgets/street_view_3d_screen.dart';
 import '../../domain/incident_model.dart';
+import '../saved_incidents_controller.dart';
 import 'alleged_offender_card.dart';
 
 /// Draggable detail sheet showing an incident's exact street context,
 /// Street View static thumbnail, 3D Photorealistic inspection launcher,
 /// interactive Street View external link, and optional [AllegedOffenderCard].
-class IncidentDetailSheet extends StatelessWidget {
+class IncidentDetailSheet extends ConsumerWidget {
   const IncidentDetailSheet({
     super.key,
     required this.incident,
@@ -142,7 +144,7 @@ class IncidentDetailSheet extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final categoryColor = _categoryColor(incident.category);
     final severityColor = _severityColor(incident.severity);
     final timeFormatter = DateFormat('EEE, MMM d, yyyy • h:mm a');
@@ -151,6 +153,11 @@ class IncidentDetailSheet extends StatelessWidget {
           latitude: incident.geo.latitude,
           longitude: incident.geo.longitude,
         );
+    final isSaved = ref.watch(
+      savedIncidentsControllerProvider.select(
+        (Set<String> ids) => ids.contains(incident.id),
+      ),
+    );
 
     return SafeArea(
       top: false,
@@ -196,14 +203,59 @@ class IncidentDetailSheet extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            Text(
-              incident.title,
-              style: const TextStyle(
-                color: AppTheme.textPrimary,
-                fontSize: 19,
-                fontWeight: FontWeight.w800,
-                height: 1.25,
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    incident.title,
+                    style: const TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w800,
+                      height: 1.25,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  key: const Key('incident_bookmark_button'),
+                  tooltip: isSaved ? 'Remove bookmark' : 'Save incident',
+                  style: IconButton.styleFrom(
+                    backgroundColor: isSaved
+                        ? AppTheme.accentAmber.withValues(alpha: 0.16)
+                        : AppTheme.surfaceElevated,
+                    side: BorderSide(
+                      color: isSaved
+                          ? AppTheme.accentAmber.withValues(alpha: 0.6)
+                          : AppTheme.borderSubtle,
+                    ),
+                  ),
+                  icon: Icon(
+                    isSaved
+                        ? Icons.bookmark_rounded
+                        : Icons.bookmark_border_rounded,
+                    color:
+                        isSaved ? AppTheme.accentAmber : AppTheme.textSecondary,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    final nowSaved = ref
+                        .read(savedIncidentsControllerProvider.notifier)
+                        .toggleBookmark(incident.id);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        duration: const Duration(seconds: 2),
+                        content: Text(
+                          nowSaved
+                              ? 'Incident saved to your local bookmarks.'
+                              : 'Removed from saved bookmarks.',
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
             const SizedBox(height: 10),
 

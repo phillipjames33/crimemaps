@@ -12,6 +12,16 @@ abstract class CameraRepository {
     int limit = 150,
   });
 
+  /// Fetches publicly documented civic cameras for the active map city or state
+  /// (explicit limit, single targeted fetch on city/scope change — never polled
+  /// on GPS ticks). Private residential cameras are strictly excluded.
+  Future<List<PublicCamera>> fetchCamerasForArea({
+    required String citySlug,
+    required String stateCode,
+    required bool stateScope,
+    int limit = 150,
+  });
+
   /// Returns anonymized neighborhood-level residential camera density zones.
   Future<List<ResidentialDensityCell>> fetchResidentialDensityCells({
     String? citySlug,

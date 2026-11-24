@@ -56,6 +56,14 @@ class AppEnv {
     'FIREBASE_AUTH_DOMAIN',
   );
 
+  static const String recaptchaV3SiteKey = String.fromEnvironment(
+    'RECAPTCHA_V3_SITE_KEY',
+  );
+
+  static bool get hasRecaptchaV3SiteKey =>
+      recaptchaV3SiteKey.isNotEmpty &&
+      !recaptchaV3SiteKey.startsWith('your_');
+
   static bool get hasFirebaseWebOptions =>
       firebaseApiKey.isNotEmpty &&
       !firebaseApiKey.startsWith('your_') &&

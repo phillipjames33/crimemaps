@@ -82,6 +82,53 @@ class FirestoreCameraRepository implements CameraRepository {
     );
   }
 
+  @override
+  Future<List<PublicCamera>> fetchCamerasForArea({
+    required String citySlug,
+    required String stateCode,
+    required bool stateScope,
+    int limit = 150,
+  }) async {
+    final normalizedCity = citySlug.trim().toLowerCase();
+    final normalizedState = stateCode.trim().toUpperCase();
+
+    if (_isLive) {
+      try {
+        Query<Map<String, dynamic>> query = _db.collection(camerasCollection);
+        if (stateScope && normalizedState.isNotEmpty) {
+          query = query.where('stateCode', isEqualTo: normalizedState);
+        } else if (normalizedCity.isNotEmpty) {
+          query = query.where('citySlug', isEqualTo: normalizedCity);
+        }
+        final snapshot = await query.limit(limit).get();
+        final live = <PublicCamera>[];
+        for (final doc in snapshot.docs) {
+          final camera = cameraFromFirestore(doc.id, doc.data());
+          if (camera != null) live.add(camera);
+        }
+        if (live.isNotEmpty) {
+          return live;
+        }
+      } catch (_) {
+        // Fall through to seeded civic cameras when offline or unindexed.
+      }
+    }
+
+    final all = <PublicCamera>[
+      ...SeedData.buildSeedCameras(),
+      ..._communityCameras,
+    ];
+    return all
+        .where((PublicCamera cam) {
+          if (stateScope) {
+            return cam.stateCode.toUpperCase() == normalizedState;
+          }
+          return cam.citySlug.toLowerCase() == normalizedCity;
+        })
+        .take(limit)
+        .toList(growable: false);
+  }
+
   Future<List<PublicCamera>> _fetchLive({
     required double centerLat,
     required double centerLng,
