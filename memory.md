@@ -36,11 +36,11 @@
   - `onTrackUploaded` (`us-east1`, Storage bucket trigger) — MIME/size/warranty validation, track activation or quarantine.
   - `submitMugshotRemoval` (`us-central1`, HTTPS callable) — 100% free instant redaction of `allegedOffender` pending verification.
 - [x] **Live Production Data Ingestion Verified (`crimemaps-515702` — `USE_MOCK_DATA=false`):**
-  - Activated live free 2026 municipal Socrata crime feeds (**Chicago PD `ijzp-q8t2`** + **San Francisco PD `wg3w-h783`**) with a 14-day lookback window and idempotent deterministic IDs, plus a 24-hour recency guard in `onHighSeverityIncident` so historical backfills do not spam FCM push notifications.
-  - Activated live **OpenStreetMap Overpass** Atlanta Metro civic camera sync (`syncPublicCameras`) with compliant `User-Agent` header and anti-doxxing filter.
-  - Added `San Francisco, CA` city preset to `MapController.cityPresets` and added placeholder-secret filtering in `readSecretOrEnv` (`functions/src/index.ts`).
-  - Verified live production Firestore collections on `crimemaps-515702`: **174 live `incidents`** (**98** Chicago PD + **63** San Francisco PD + **13** Atlanta/GA/US baseline), **300+ live OSM `cameras`** across Atlanta Metro, **4 historical `territories`**, and **6 active royalty-free `tracks`**.
-  - Verified end-to-end live Firestore streaming in Flutter Web (`http://127.0.0.1:8088/#/map` with `USE_MOCK_DATA=false`): `5 Incidents • Atlanta, GA` + `2 Historical Context` and `63 Incidents • San Francisco, CA` (live SFPD street intersections) streamed via Firestore `Listen/channel` with HTTP 200 and zero permission errors.
+  - Activated live free 2026 municipal Socrata crime feeds (**Chicago PD `ijzp-q8t2`**, **San Francisco PD `wg3w-h783`**, and **Dallas PD `qv6i-rri7`** with nested dot-path coordinate support in `functions/src/utils/json.ts`) using a 14-day lookback window and idempotent deterministic IDs, plus a 24-hour recency guard in `onHighSeverityIncident` so historical backfills do not spam FCM push notifications.
+  - Activated live **OpenStreetMap Overpass** multi-city civic camera sync (**Atlanta, Chicago & San Francisco** metros) with compliant `User-Agent` header and anti-doxxing filter.
+  - Added `San Francisco, CA` and `Dallas, TX` city presets to `MapController.cityPresets` and added placeholder-secret filtering in `readSecretOrEnv` (`functions/src/index.ts`).
+  - Verified live production Firestore collections on `crimemaps-515702`: **274 live `incidents`** (**100** Dallas PD + **98** Chicago PD + **63** San Francisco PD + **13** Atlanta/GA/US baseline), **752 live OSM `cameras`**, **4 historical `territories`**, and **6 active royalty-free `tracks`**.
+  - Verified end-to-end live Firestore streaming in Flutter Web (`http://127.0.0.1:8088/#/map` with `USE_MOCK_DATA=false`) and on the native Android production release build (`com.crimemaps.crime_maps`).
 - [x] Built Firestore CLI seeder (`functions/src/seed/seedFirestore.ts`) and verified seeding against the local Firebase Emulator Suite (`14` incidents, `7` public cameras with `2` private residential cameras blocked, `4` historical territories, `6` indie tracks).
 - [x] Configured Artifact Registry 1-day container cleanup policy across `us-central1` and `us-east1`.
 
@@ -59,7 +59,12 @@
     - `https://crimemaps-515702.web.app/terms.html` (Terms of Service, Indie Warranty & DMCA Safe Harbor)
     - `https://crimemaps-515702.web.app/removal.html` (100% Free Record Removal & Web Account Deletion Portal)
 - [x] **GitHub Actions CI/CD Verification Pipeline (`.github/workflows/ci.yml`):** Automated 3-job workflow (`flutter-verify`, `functions-verify`, `compliance-and-security-scan`) enforcing the 4-Step Pre-Commit Verification Gate on every push and pull request to `main`.
-- [x] **Documentation & Store Review Materials:** Authored comprehensive `README.md` and copy-paste App Store / Google Play compliance review notes (`docs/APP_STORE_COMPLIANCE.md`) including live Hosting legal URLs.
+- [x] **Store Launch Assets & Submission Kit (`assets/store/` + `docs/STORE_LISTING_KIT.md`):**
+  - Generated official **Google Play Feature Graphic (`1024x500`)** at `assets/store/feature_graphic_1024x500.png`.
+  - Captured and visually verified **5 live production dark-mode Android phone screenshots (`1080x2400`)** across all 5 tabs (`assets/store/screenshots/01_crime_map.png` through `05_pro_paywall.png`).
+  - Fixed Android/iOS dark car-navigation map rendering (`_darkMapStyle`) across both Light and Dark OS themes and fixed Creator Portal narrow-screen audio button wrapping (`Wrap`).
+  - Authored complete copy-paste **Google Play Console & Apple App Store Connect Submission Kit** (`docs/STORE_LISTING_KIT.md`) covering metadata, keywords, SKU tables, Data Safety / App Privacy matrices, and reviewer test steps.
+- [x] **Documentation & Store Review Materials:** Authored comprehensive `README.md`, `docs/APP_STORE_COMPLIANCE.md`, and `docs/STORE_LISTING_KIT.md` including live Hosting legal URLs.
 - [x] **Custom App Icon & Dark Launch Splash Screen (Android, iOS & Web):**
   - Rendered and installed custom dark car-navigation Crime Maps emblem across all 5 Android `mipmap-*` densities, all 15 opaque 24-bit RGB iOS `AppIcon.appiconset` sizes (`20x20` to `1024x1024`), and all 5 Web icons/favicons (`web/manifest.json` theme `#0B0F17`).
   - Configured `#0B0F17` dark Android launch background with centered `splash_logo.png` (`drawable/launch_background.xml` & `drawable-v21/launch_background.xml`).
@@ -68,7 +73,7 @@
   - Generated local gitignored 2048-bit RSA Android upload keystore (`android/upload-keystore.jks` + `android/key.properties`), registered release SHA-1 (`26:A4:B0:0A:37:BD:D5:D3:2A:E4:0D:29:79:9A:55:21:F2:49:C9:FD`) & SHA-256 on Firebase Android app `1:864680228535:android:763df22703a56cfa757f32`, and refreshed `android/app/google-services.json`.
   - Built & verified signed **Google Play App Bundle:** `build/app/outputs/bundle/release/app-release.aab` (`53.3 MB`, `jarsigner -verify` passed) with `USE_MOCK_DATA=false`, custom icon/splash, and live Firebase/Maps/RevenueCat keys.
   - Built production **Android Release APK** (`build/app/outputs/flutter-apk/app-release.apk`, `60.8 MB`) and **Flutter Web Release Bundle** (`build/web/`).
-- [x] **Pre-Commit Verification Gate:** `build_runner` (0 errors), `flutter analyze --fatal-infos` (0 issues), `flutter test` (**36/36 passed**), `functions` build & Jest (**25/25 passed**), and Compliance/Secret/Architecture scans (**0 hardcoded secrets, 0 banned Apple 1.4.4 strings, 0 layer violations, 0 tracked secret files**).
+- [x] **Pre-Commit Verification Gate:** `build_runner` (0 errors), `flutter analyze --fatal-infos` (0 issues), `flutter test` (**36/36 passed**), `functions` build & Jest (**26/26 passed**), and Compliance/Secret/Architecture scans (**0 hardcoded secrets, 0 banned Apple 1.4.4 strings, 0 layer violations, 0 tracked secret files**).
 
 ### External Services & Key Setup (All Secrets Kept Locally in Gitignored Files)
 - [x] **Google Cloud (`crimemaps-515702`):** Enabled all 5 Maps APIs; restricted `Maps Platform API Key` to **only those 5 Maps APIs**; created & published Dark Map Style **`Crime Maps Dark Car-Nav`** (`4daefcf00649c519c8e4111b`) and attached it to Map ID `85079358df0fab979e47647c`.

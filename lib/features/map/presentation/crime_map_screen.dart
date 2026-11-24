@@ -1,13 +1,11 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/config/app_env.dart';
 import '../../../core/geo/location_service.dart';
 import '../../../core/mock/seed_data.dart';
 import '../../../core/theme/app_theme.dart';
@@ -415,9 +413,6 @@ class _CrimeMapScreenState extends ConsumerState<CrimeMapScreen> {
         bearing: viewport.bearing,
       ),
       style: _darkMapStyle,
-      mapId: !kIsWeb && AppEnv.googleMapsMapId.isNotEmpty
-          ? AppEnv.googleMapsMapId
-          : null,
       myLocationEnabled: false,
       myLocationButtonEnabled: false,
       zoomControlsEnabled: false,

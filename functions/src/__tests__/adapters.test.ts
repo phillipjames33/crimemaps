@@ -73,6 +73,50 @@ describe('crime feed adapters', () => {
     );
   });
 
+  test('SocrataCrimeFeedAdapter reads nested dot-path coordinates (e.g. Dallas PD geocoded_column)', async () => {
+    const fetcher = mockJsonFetcher([
+      {
+        servnumid: '172814-2026-01',
+        offincident: 'BMV',
+        mo: 'Vehicle break-in on Main St',
+        incident_address: '1500 MAIN ST',
+        edate: '2026-11-23 21:51:11.0000000',
+        geocoded_column: {
+          latitude: '32.7805',
+          longitude: '-96.7987',
+        },
+      },
+    ]);
+
+    const adapter = new SocrataCrimeFeedAdapter(
+      {
+        id: 'dallas_pd_socrata',
+        domain: 'www.dallasopendata.com',
+        datasetId: 'qv6i-rri7',
+        cityName: 'Dallas',
+        stateCode: 'TX',
+        sourceAgency: 'Dallas Police Department Open Data',
+        fieldMap: {
+          id: 'servnumid',
+          title: 'offincident',
+          description: 'mo',
+          address: 'incident_address',
+          occurredAt: 'edate',
+          latitude: 'geocoded_column.latitude',
+          longitude: 'geocoded_column.longitude',
+        },
+      },
+      undefined,
+      fetcher,
+    );
+
+    const records = await adapter.fetchRecords(new Date('2026-11-10T00:00:00.000Z'));
+    expect(records).toHaveLength(1);
+    expect(records[0].externalId).toBe('172814-2026-01');
+    expect(records[0].latitude).toBeCloseTo(32.7805);
+    expect(records[0].longitude).toBeCloseTo(-96.7987);
+  });
+
   test('ArcGisCrimeFeedAdapter maps FeatureServer attributes + geometry', async () => {
     const fetcher = mockJsonFetcher({
       features: [

@@ -65,6 +65,14 @@ class MapController extends _$MapController {
       longitude: -122.4194,
     ),
     CityPreset(
+      citySlug: 'dallas',
+      cityName: 'Dallas',
+      stateCode: 'TX',
+      zipCode: '75201',
+      latitude: 32.7767,
+      longitude: -96.7970,
+    ),
+    CityPreset(
       citySlug: 'los_angeles',
       cityName: 'Los Angeles',
       stateCode: 'CA',

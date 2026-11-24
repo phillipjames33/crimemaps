@@ -15,15 +15,27 @@ export function asArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
 }
 
+/** Reads a top-level or dot-separated nested field (e.g. "geocoded_column.latitude"). */
+function readField(obj: JsonRecord, key: string): unknown {
+  if (!key.includes('.')) return obj[key];
+  let current: unknown = obj;
+  for (const segment of key.split('.')) {
+    const rec = asRecord(current);
+    if (rec === null) return undefined;
+    current = rec[segment];
+  }
+  return current;
+}
+
 export function readString(obj: JsonRecord, key: string): string | null {
-  const v = obj[key];
+  const v = readField(obj, key);
   if (typeof v === 'string') return v.trim().length > 0 ? v.trim() : null;
   if (typeof v === 'number' && Number.isFinite(v)) return String(v);
   return null;
 }
 
 export function readNumber(obj: JsonRecord, key: string): number | null {
-  const v = obj[key];
+  const v = readField(obj, key);
   if (typeof v === 'number' && Number.isFinite(v)) return v;
   if (typeof v === 'string' && v.trim().length > 0) {
     const n = Number(v);
@@ -33,7 +45,7 @@ export function readNumber(obj: JsonRecord, key: string): number | null {
 }
 
 export function readDate(obj: JsonRecord, key: string): Date | null {
-  const v = obj[key];
+  const v = readField(obj, key);
   if (typeof v === 'number' && Number.isFinite(v)) return new Date(v);
   if (typeof v === 'string' && v.trim().length > 0) {
     const d = new Date(v);

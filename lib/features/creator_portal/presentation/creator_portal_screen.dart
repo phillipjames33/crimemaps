@@ -415,7 +415,10 @@ class _CreatorPortalScreenState extends ConsumerState<CreatorPortalScreen> {
                       style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
                     ),
                   const SizedBox(height: 8),
-                  Row(
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: <Widget>[
                       OutlinedButton.icon(
                         key: const Key('creator_pick_file_button'),
@@ -429,7 +432,6 @@ class _CreatorPortalScreenState extends ConsumerState<CreatorPortalScreen> {
                         label: const Text('Pick MP3 / WAV'),
                         onPressed: _isPickingFile ? null : _pickAudioFile,
                       ),
-                      const SizedBox(width: 8),
                       TextButton.icon(
                         key: const Key('creator_demo_audio_button'),
                         icon: const Icon(Icons.flash_on, size: 16, color: AppTheme.accentAmber),
