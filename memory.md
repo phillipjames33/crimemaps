@@ -51,7 +51,11 @@
 
 ### External Service & Key Setup (Stored Locally in Gitignored `.env`)
 - [x] **Google Cloud (`crimemaps-515702`):** Enabled Maps SDK for Android, Maps SDK for iOS, Maps JavaScript API, Street View Static API, and Map Tiles API; created `GOOGLE_MAPS_API_KEY` and Android `GOOGLE_MAPS_MAP_ID` (`85079358df0fab979e47647c`).
-- [x] **Firebase (`crimemaps-515702` — Blaze Active):** Provisioned Firebase on `crimemaps-515702`; enabled Authentication (**Email/Password** + **Google**), Cloud Firestore (`nam5`, production mode), and Firebase Storage (`gs://crimemaps-515702.firebasestorage.app`, `US-EAST1`, production mode); registered Web (`1:864680228535:web:d59629693cb445b1757f32`), Android (`com.crimemaps.crime_maps` with debug SHA-1), and iOS (`com.crimemaps.crimeMaps`) apps; saved Firebase Web config to local `.env` and updated `.firebaserc`.
+- [x] **Firebase (`crimemaps-515702` — Blaze Active & Production Backend Deployed):**
+  - Provisioned Firebase on `crimemaps-515702`; enabled Authentication (**Email/Password** + **Google**), Cloud Firestore (`nam5`, production mode), and Firebase Storage (`gs://crimemaps-515702.firebasestorage.app`, `US-EAST1`, production mode).
+  - Registered Web (`1:864680228535:web:d59629693cb445b1757f32`), Android (`com.crimemaps.crime_maps` with debug SHA-1, `google-services.json` placed locally in gitignored `android/app/`), and iOS (`com.crimemaps.crimeMaps`) apps; saved Firebase Web config to local `.env` and updated `.firebaserc`.
+  - Deployed `firestore.rules`, `firestore.indexes.json` (with `incidents.expireAt` 45-day TTL override), `storage.rules`, Secret Manager entries (`SPOTCRIME_API_KEY`, `SOCRATA_APP_TOKEN`, `ARCGIS_TOKEN`, `DEFLOCK_API_KEY`), and **all 5 Cloud Functions v2** (`ingestCrimeFeeds`, `syncPublicCameras`, `onHighSeverityIncident`, `submitMugshotRemoval` in `us-central1`, and `onTrackUploaded` in `us-east1`).
+  - Configured Artifact Registry 1-day container cleanup policy across `us-central1` and `us-east1`.
 - [x] **RevenueCat (`CrimeMapsAi` / `proj3c8fa1e5`):** Created `Crime Maps Android` (`com.crimemaps.crime_maps`) and `Crime Maps iOS` (`com.crimemaps.crimeMaps`, reusing Apple IAP key `H2Q4Y496N5`); saved both public SDK keys to local `.env`.
 - [x] **Google AdMob:** Configured official Google test AdMob App IDs & Banner Unit ID in `.env` for safe dev/emulator testing.
 
@@ -60,13 +64,10 @@
 ## 2. What Still Needs to Be Completed
 
 ### Security & Production Backend Provisioning
-- [ ] **Re-auth Firebase CLI & Deploy Backend to `crimemaps-515702`:**
-  - [ ] Run `firebase login --reauth` to refresh the expired CLI OAuth token.
-  - [ ] Deploy rules, indexes, and all 5 Cloud Functions v2: `firebase deploy --project crimemaps-515702 --only firestore:rules,firestore:indexes,storage,functions`.
-  - [ ] Optionally seed production/staging Firestore or configure live `CRIME_FEED_SOURCES` / `CAMERA_FEED_SOURCES` and Secret Manager keys (`SPOTCRIME_API_KEY`, `SOCRATA_APP_TOKEN`, `ARCGIS_TOKEN`, `DEFLOCK_API_KEY`).
-  - [ ] Add `com.google.gms.google-services` Gradle plugin to Android build once `android/app/google-services.json` is verified locally, and download `ios/Runner/GoogleService-Info.plist` from Firebase Console for iOS builds.
+- [ ] **Finalize Native Firebase & Live Mode (`crimemaps-515702`):**
+  - [ ] Add `com.google.gms.google-services` Gradle plugin to Android build (using local gitignored `android/app/google-services.json`) and download `ios/Runner/GoogleService-Info.plist` from Firebase Console for iOS builds.
   - [ ] Enable Apple Sign-In provider & Firebase App Check in Firebase Console before App Store release.
-  - [ ] Switch `USE_MOCK_DATA=false` in `.env` once production data & functions are deployed.
+  - [ ] Replace Secret Manager placeholders (`SPOTCRIME_API_KEY`, `SOCRATA_APP_TOKEN`, `ARCGIS_TOKEN`, `DEFLOCK_API_KEY`) when plugging in live paid/authenticated feeds, configure `CRIME_FEED_SOURCES` / `CAMERA_FEED_SOURCES`, and switch `USE_MOCK_DATA=false`.
 - [ ] **Restrict Google Maps API Key:** In Google Cloud Console (`crimemaps-515702` → Maps Platform → Credentials), restrict `Maps Platform API Key` to only the 5 enabled Maps APIs and your Android SHA-1 / iOS Bundle ID / Web referrer restrictions before release.
 - [ ] **Attach Dark Cloud Map Style (Optional):** Bind a dark map style to Cloud Map ID `85079358df0fab979e47647c` in Google Maps Studio (or leave `GOOGLE_MAPS_MAP_ID` blank to use the bundled `assets/map_styles/dark_car_nav.json`).
 

@@ -136,7 +136,7 @@ export const onHighSeverityIncident = onDocumentCreated(
 // ───────────── 4. Indie Track Storage Validation ─────────────
 export const onTrackUploaded = onObjectFinalized(
   {
-    region: 'us-central1',
+    region: 'us-east1',
     memory: '256MiB',
   },
   async (event) => {
