@@ -49,6 +49,7 @@ app.*.map.json
 .env
 .env.*
 !.env.example
+!.env.*.example
 service-account*.json
 **/google-services.json
 **/GoogleService-Info.plist
@@ -65,3 +66,7 @@ ui-debug.log
 
 # Generated local web config (reads API keys from .env; never commit)
 web/env_config.js
+
+# Android release signing credentials (never commit)
+android/key.properties
+ios/Flutter/Secrets.xcconfig

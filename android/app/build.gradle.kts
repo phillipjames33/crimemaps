@@ -52,9 +52,27 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("debug")
+            val keystorePropertiesFile = rootProject.file("key.properties")
+            if (keystorePropertiesFile.exists()) {
+                val kp = Properties().apply {
+                    keystorePropertiesFile.inputStream().use { load(it) }
+                }
+                signingConfigs.create("release") {
+                    keyAlias = kp.getProperty("keyAlias")
+                    keyPassword = kp.getProperty("keyPassword")
+                    storeFile = kp.getProperty("storeFile")?.let { file(it) }
+                    storePassword = kp.getProperty("storePassword")
+                }
+                signingConfig = signingConfigs.getByName("release")
+            } else {
+                signingConfig = signingConfigs.getByName("debug")
+            }
         }
     }
+}
+
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
 }
 
 flutter {
