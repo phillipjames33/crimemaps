@@ -53,16 +53,19 @@
 - [x] **Firebase Auth UI & Guideline 5.1.1(v) Account Deletion (`lib/features/auth/`):** `AppUser`, `AuthRepository`, `FirebaseAuthRepository` (Email/Password, Google, Apple, Password Reset, permanent `deleteAccount()` deleting `users/{uid}` + Firebase Auth user, with offline mock fallback), `AuthController`, `AuthSheet` (preserving guest browsing, 100% free record removal, **Delete Account Permanently** confirmation flow, and clickable hosted legal links), and `AccountActionChip`.
 - [x] **Paywall Legal Disclosures (Apple Guideline 3.1.2(c)):** Added auto-renewal cancellation notice and clickable **Privacy Policy**, **Terms of Service**, and **Free Record Removal** links directly on `PaywallScreen`.
 - [x] **Live Production Web App & Legal Portal (`hosting/` -> `https://crimemaps-515702.web.app`):**
-  - Deployed and HTTP-200 verified live production Flutter Web app (`USE_MOCK_DATA=false`, `--base-href "/app/"`, `hosting/app/` gitignored so zero build artifacts or keys enter Git) alongside the static legal portal:
-    - `https://crimemaps-515702.web.app/` (Overview, Presumed Innocent Pledge & **Launch Live Web App** CTA)
+  - Deployed and HTTP-200 verified live production Flutter Web app (`USE_MOCK_DATA=false`, `--base-href "/app/"`, `hosting/app/` gitignored so zero build artifacts or keys enter Git) alongside the static legal portal and OpenGraph/Twitter social share preview card (`/og-card.png`):
+    - `https://crimemaps-515702.web.app/` (Overview, Presumed Innocent Pledge, OpenGraph card & **Launch Live Web App** CTA)
     - `https://crimemaps-515702.web.app/app/` (**Live Production Crime Maps Web App** with SPA `/app/**` rewrite in `firebase.json`)
+    - `https://crimemaps-515702.web.app/og-card.png` (`1024x500` OpenGraph & Twitter preview image)
     - `https://crimemaps-515702.web.app/privacy.html` (App Store & Google Play Privacy Policy)
     - `https://crimemaps-515702.web.app/terms.html` (Terms of Service, Indie Warranty & DMCA Safe Harbor)
     - `https://crimemaps-515702.web.app/removal.html` (100% Free Record Removal & Web Account Deletion Portal)
-- [x] **Live Firestore Civic Camera Map Layer, Local Bookmarks & Firebase App Check:**
-  - Wired `CameraRepository.fetchCamerasForArea(...)` (`limit(150)`, zero GPS polling, anti-doxxing filtered) and `camerasForMapViewportProvider` (scoped `.select()` on city/state/scope) directly into `CrimeMapScreen`, rendering live Firestore OSM civic cameras and a live `Civic Cameras` count pill on the map.
+- [x] **Live Firestore Civic Camera Map Layer, Category/Severity Filters, Local Bookmarks & Firebase App Check:**
+  - Wired `CameraRepository.fetchCamerasForArea(...)` (`limit(150)`, zero GPS polling, anti-doxxing filtered) and `camerasForMapViewportProvider` directly into `CrimeMapScreen` (fixed `_MapBranchView` override in `app_router.dart`), verified live on Android 16 rendering **`150 Civic Cameras`** across Atlanta Metro.
+  - Upgraded `syncPublicCameras` (`OverpassCameraFeedAdapter` + `runSyncPublicCameras`) to run sequentially across 7 U.S. metros with automatic Overpass mirror fallbacks (`overpass-api.de`, `overpass.kumi.systems`, `maps.mail.ru`) to prevent `HTTP 429` rate limits.
+  - Added collapsible **Category (`All`, `Violent`, `Property`, `Traffic / DUI`) & Severity (`High & Critical`)** filter chips in `ScopeToggleBar` + `MapController` + `scopedIncidentsProvider` (also searching unredacted offender names).
   - Added local Hive-backed `SavedIncidentsController` with a 1-tap bookmark toggle on `IncidentDetailSheet` and a toggleable `Saved (N)` bookmark filter chip on `CrimeMapScreen` (works cleanly in guest mode with zero Firestore writes).
-  - Activated `FirebaseAppCheck` safely in `FirebaseBootstrap` (`AndroidProvider.playIntegrity`/`debug`, `AppleProvider.appAttestWithDeviceCheckFallback`/`debug`, optional Web `ReCaptchaV3Provider` via `RECAPTCHA_V3_SITE_KEY`).
+  - Activated `FirebaseAppCheck` safely and non-blockingly in `FirebaseBootstrap` (`AndroidProvider.playIntegrity`/`debug`, `AppleProvider.appAttestWithDeviceCheckFallback`/`debug`, optional Web `ReCaptchaV3Provider` via `RECAPTCHA_V3_SITE_KEY`).
 - [x] **GitHub Actions CI/CD Verification Pipeline (`.github/workflows/ci.yml`):** Automated 3-job workflow (`flutter-verify`, `functions-verify`, `compliance-and-security-scan`) enforcing the 4-Step Pre-Commit Verification Gate on every push and pull request to `main`.
 - [x] **Store Launch Assets & Submission Kit (`assets/store/` + `docs/STORE_LISTING_KIT.md`):**
   - Generated official **Google Play Feature Graphic (`1024x500`)** at `assets/store/feature_graphic_1024x500.png`.
@@ -78,7 +81,7 @@
   - Generated local gitignored 2048-bit RSA Android upload keystore (`android/upload-keystore.jks` + `android/key.properties`), registered release SHA-1 (`26:A4:B0:0A:37:BD:D5:D3:2A:E4:0D:29:79:9A:55:21:F2:49:C9:FD`) & SHA-256 on Firebase Android app `1:864680228535:android:763df22703a56cfa757f32`, and refreshed `android/app/google-services.json`.
   - Built & verified signed **Google Play App Bundle:** `build/app/outputs/bundle/release/app-release.aab` (`53.3 MB`, `jarsigner -verify` passed) with `USE_MOCK_DATA=false`, custom icon/splash, and live Firebase/Maps/RevenueCat keys.
   - Built production **Android Release APK** (`build/app/outputs/flutter-apk/app-release.apk`, `60.8 MB`) and **Flutter Web Release Bundle** (`build/web/`).
-- [x] **Pre-Commit Verification Gate:** `build_runner` (0 errors), `flutter analyze --fatal-infos` (0 issues), `flutter test` (**39/39 passed**), `functions` build & Jest (**27/27 passed**), and Compliance/Secret/Architecture scans (**0 hardcoded secrets, 0 banned Apple 1.4.4 strings, 0 layer violations, 0 tracked secret files**).
+- [x] **Pre-Commit Verification Gate:** `build_runner` (0 errors), `flutter analyze --fatal-infos` (0 issues), `flutter test` (**40/40 passed**), `functions` build & Jest (**27/27 passed**), and Compliance/Secret/Architecture scans (**0 hardcoded secrets, 0 banned Apple 1.4.4 strings, 0 layer violations, 0 tracked secret files**).
 
 ### External Services & Key Setup (All Secrets Kept Locally in Gitignored Files)
 - [x] **Google Cloud (`crimemaps-515702`):** Enabled all 5 Maps APIs; restricted `Maps Platform API Key` to **only those 5 Maps APIs**; created & published Dark Map Style **`Crime Maps Dark Car-Nav`** (`4daefcf00649c519c8e4111b`) and attached it to Map ID `85079358df0fab979e47647c`.

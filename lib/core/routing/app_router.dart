@@ -250,15 +250,14 @@ class _MapBranchView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cameras = ref.watch(
-      cameraRadarControllerProvider.select((s) => s.cameras),
-    );
     final densityCells = ref.watch(
       cameraRadarControllerProvider.select((s) => s.densityCells),
     );
 
+    // Omit `cameras:` so CrimeMapScreen streams live city/state civic cameras
+    // via `camerasForMapViewportProvider` (limit 150, zero GPS polling), while
+    // `CameraRadarController` independently drives local GPS proximity notices.
     return CrimeMapScreen(
-      cameras: cameras,
       densityCells: densityCells,
       topBanner: const CameraAlertBannerHost(),
       onRequestOffenderRemoval: (Incident incident) {

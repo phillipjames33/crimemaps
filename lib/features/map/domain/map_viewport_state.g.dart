@@ -26,6 +26,11 @@ _MapViewportState _$MapViewportStateFromJson(
   showResidentialDensityLayer:
       json['showResidentialDensityLayer'] as bool? ?? false,
   searchQuery: json['searchQuery'] as String? ?? '',
+  selectedCategory: $enumDecodeNullable(
+    _$IncidentCategoryEnumMap,
+    json['selectedCategory'],
+  ),
+  highSeverityOnly: json['highSeverityOnly'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$MapViewportStateToJson(_MapViewportState instance) =>
@@ -46,10 +51,19 @@ Map<String, dynamic> _$MapViewportStateToJson(_MapViewportState instance) =>
       'showCamerasLayer': instance.showCamerasLayer,
       'showResidentialDensityLayer': instance.showResidentialDensityLayer,
       'searchQuery': instance.searchQuery,
+      'selectedCategory': _$IncidentCategoryEnumMap[instance.selectedCategory],
+      'highSeverityOnly': instance.highSeverityOnly,
     };
 
 const _$MapScopeEnumMap = {
   MapScope.area: 'area',
   MapScope.city: 'city',
   MapScope.state: 'state',
+};
+
+const _$IncidentCategoryEnumMap = {
+  IncidentCategory.violent: 'violent',
+  IncidentCategory.property: 'property',
+  IncidentCategory.trafficDui: 'trafficDui',
+  IncidentCategory.other: 'other',
 };

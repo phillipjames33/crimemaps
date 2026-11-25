@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../incidents/domain/incident_model.dart';
 import '../../incidents/domain/incident_repository.dart';
 import '../domain/map_viewport_state.dart';
 
@@ -217,6 +218,22 @@ class MapController extends _$MapController {
   void toggleResidentialDensityLayer() {
     state = state.copyWith(
       showResidentialDensityLayer: !state.showResidentialDensityLayer,
+    );
+  }
+
+  void setCategoryFilter(IncidentCategory? category) {
+    state = state.copyWith(selectedCategory: category);
+  }
+
+  void toggleHighSeverityOnly() {
+    state = state.copyWith(highSeverityOnly: !state.highSeverityOnly);
+  }
+
+  void clearIncidentFilters() {
+    state = state.copyWith(
+      selectedCategory: null,
+      highSeverityOnly: false,
+      searchQuery: '',
     );
   }
 

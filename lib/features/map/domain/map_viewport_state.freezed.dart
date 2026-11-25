@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MapViewportState {
 
- MapScope get scope; double get centerLat; double get centerLng; double get zoom; double get tilt; double get bearing; String get activeCitySlug; String get activeCityName; String get activeStateCode; String get activeZipCode; bool get carFollowMode; bool get showIncidentsLayer; bool get showTerritoriesLayer; bool get showCamerasLayer; bool get showResidentialDensityLayer; String get searchQuery;
+ MapScope get scope; double get centerLat; double get centerLng; double get zoom; double get tilt; double get bearing; String get activeCitySlug; String get activeCityName; String get activeStateCode; String get activeZipCode; bool get carFollowMode; bool get showIncidentsLayer; bool get showTerritoriesLayer; bool get showCamerasLayer; bool get showResidentialDensityLayer; String get searchQuery; IncidentCategory? get selectedCategory; bool get highSeverityOnly;
 /// Create a copy of MapViewportState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $MapViewportStateCopyWith<MapViewportState> get copyWith => _$MapViewportStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MapViewportState&&(identical(other.scope, scope) || other.scope == scope)&&(identical(other.centerLat, centerLat) || other.centerLat == centerLat)&&(identical(other.centerLng, centerLng) || other.centerLng == centerLng)&&(identical(other.zoom, zoom) || other.zoom == zoom)&&(identical(other.tilt, tilt) || other.tilt == tilt)&&(identical(other.bearing, bearing) || other.bearing == bearing)&&(identical(other.activeCitySlug, activeCitySlug) || other.activeCitySlug == activeCitySlug)&&(identical(other.activeCityName, activeCityName) || other.activeCityName == activeCityName)&&(identical(other.activeStateCode, activeStateCode) || other.activeStateCode == activeStateCode)&&(identical(other.activeZipCode, activeZipCode) || other.activeZipCode == activeZipCode)&&(identical(other.carFollowMode, carFollowMode) || other.carFollowMode == carFollowMode)&&(identical(other.showIncidentsLayer, showIncidentsLayer) || other.showIncidentsLayer == showIncidentsLayer)&&(identical(other.showTerritoriesLayer, showTerritoriesLayer) || other.showTerritoriesLayer == showTerritoriesLayer)&&(identical(other.showCamerasLayer, showCamerasLayer) || other.showCamerasLayer == showCamerasLayer)&&(identical(other.showResidentialDensityLayer, showResidentialDensityLayer) || other.showResidentialDensityLayer == showResidentialDensityLayer)&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MapViewportState&&(identical(other.scope, scope) || other.scope == scope)&&(identical(other.centerLat, centerLat) || other.centerLat == centerLat)&&(identical(other.centerLng, centerLng) || other.centerLng == centerLng)&&(identical(other.zoom, zoom) || other.zoom == zoom)&&(identical(other.tilt, tilt) || other.tilt == tilt)&&(identical(other.bearing, bearing) || other.bearing == bearing)&&(identical(other.activeCitySlug, activeCitySlug) || other.activeCitySlug == activeCitySlug)&&(identical(other.activeCityName, activeCityName) || other.activeCityName == activeCityName)&&(identical(other.activeStateCode, activeStateCode) || other.activeStateCode == activeStateCode)&&(identical(other.activeZipCode, activeZipCode) || other.activeZipCode == activeZipCode)&&(identical(other.carFollowMode, carFollowMode) || other.carFollowMode == carFollowMode)&&(identical(other.showIncidentsLayer, showIncidentsLayer) || other.showIncidentsLayer == showIncidentsLayer)&&(identical(other.showTerritoriesLayer, showTerritoriesLayer) || other.showTerritoriesLayer == showTerritoriesLayer)&&(identical(other.showCamerasLayer, showCamerasLayer) || other.showCamerasLayer == showCamerasLayer)&&(identical(other.showResidentialDensityLayer, showResidentialDensityLayer) || other.showResidentialDensityLayer == showResidentialDensityLayer)&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery)&&(identical(other.selectedCategory, selectedCategory) || other.selectedCategory == selectedCategory)&&(identical(other.highSeverityOnly, highSeverityOnly) || other.highSeverityOnly == highSeverityOnly));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,scope,centerLat,centerLng,zoom,tilt,bearing,activeCitySlug,activeCityName,activeStateCode,activeZipCode,carFollowMode,showIncidentsLayer,showTerritoriesLayer,showCamerasLayer,showResidentialDensityLayer,searchQuery);
+int get hashCode => Object.hash(runtimeType,scope,centerLat,centerLng,zoom,tilt,bearing,activeCitySlug,activeCityName,activeStateCode,activeZipCode,carFollowMode,showIncidentsLayer,showTerritoriesLayer,showCamerasLayer,showResidentialDensityLayer,searchQuery,selectedCategory,highSeverityOnly);
 
 @override
 String toString() {
-  return 'MapViewportState(scope: $scope, centerLat: $centerLat, centerLng: $centerLng, zoom: $zoom, tilt: $tilt, bearing: $bearing, activeCitySlug: $activeCitySlug, activeCityName: $activeCityName, activeStateCode: $activeStateCode, activeZipCode: $activeZipCode, carFollowMode: $carFollowMode, showIncidentsLayer: $showIncidentsLayer, showTerritoriesLayer: $showTerritoriesLayer, showCamerasLayer: $showCamerasLayer, showResidentialDensityLayer: $showResidentialDensityLayer, searchQuery: $searchQuery)';
+  return 'MapViewportState(scope: $scope, centerLat: $centerLat, centerLng: $centerLng, zoom: $zoom, tilt: $tilt, bearing: $bearing, activeCitySlug: $activeCitySlug, activeCityName: $activeCityName, activeStateCode: $activeStateCode, activeZipCode: $activeZipCode, carFollowMode: $carFollowMode, showIncidentsLayer: $showIncidentsLayer, showTerritoriesLayer: $showTerritoriesLayer, showCamerasLayer: $showCamerasLayer, showResidentialDensityLayer: $showResidentialDensityLayer, searchQuery: $searchQuery, selectedCategory: $selectedCategory, highSeverityOnly: $highSeverityOnly)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $MapViewportStateCopyWith<$Res>  {
   factory $MapViewportStateCopyWith(MapViewportState value, $Res Function(MapViewportState) _then) = _$MapViewportStateCopyWithImpl;
 @useResult
 $Res call({
- MapScope scope, double centerLat, double centerLng, double zoom, double tilt, double bearing, String activeCitySlug, String activeCityName, String activeStateCode, String activeZipCode, bool carFollowMode, bool showIncidentsLayer, bool showTerritoriesLayer, bool showCamerasLayer, bool showResidentialDensityLayer, String searchQuery
+ MapScope scope, double centerLat, double centerLng, double zoom, double tilt, double bearing, String activeCitySlug, String activeCityName, String activeStateCode, String activeZipCode, bool carFollowMode, bool showIncidentsLayer, bool showTerritoriesLayer, bool showCamerasLayer, bool showResidentialDensityLayer, String searchQuery, IncidentCategory? selectedCategory, bool highSeverityOnly
 });
 
 
@@ -65,7 +65,7 @@ class _$MapViewportStateCopyWithImpl<$Res>
 
 /// Create a copy of MapViewportState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? scope = null,Object? centerLat = null,Object? centerLng = null,Object? zoom = null,Object? tilt = null,Object? bearing = null,Object? activeCitySlug = null,Object? activeCityName = null,Object? activeStateCode = null,Object? activeZipCode = null,Object? carFollowMode = null,Object? showIncidentsLayer = null,Object? showTerritoriesLayer = null,Object? showCamerasLayer = null,Object? showResidentialDensityLayer = null,Object? searchQuery = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? scope = null,Object? centerLat = null,Object? centerLng = null,Object? zoom = null,Object? tilt = null,Object? bearing = null,Object? activeCitySlug = null,Object? activeCityName = null,Object? activeStateCode = null,Object? activeZipCode = null,Object? carFollowMode = null,Object? showIncidentsLayer = null,Object? showTerritoriesLayer = null,Object? showCamerasLayer = null,Object? showResidentialDensityLayer = null,Object? searchQuery = null,Object? selectedCategory = freezed,Object? highSeverityOnly = null,}) {
   return _then(_self.copyWith(
 scope: null == scope ? _self.scope : scope // ignore: cast_nullable_to_non_nullable
 as MapScope,centerLat: null == centerLat ? _self.centerLat : centerLat // ignore: cast_nullable_to_non_nullable
@@ -83,7 +83,9 @@ as bool,showTerritoriesLayer: null == showTerritoriesLayer ? _self.showTerritori
 as bool,showCamerasLayer: null == showCamerasLayer ? _self.showCamerasLayer : showCamerasLayer // ignore: cast_nullable_to_non_nullable
 as bool,showResidentialDensityLayer: null == showResidentialDensityLayer ? _self.showResidentialDensityLayer : showResidentialDensityLayer // ignore: cast_nullable_to_non_nullable
 as bool,searchQuery: null == searchQuery ? _self.searchQuery : searchQuery // ignore: cast_nullable_to_non_nullable
-as String,
+as String,selectedCategory: freezed == selectedCategory ? _self.selectedCategory : selectedCategory // ignore: cast_nullable_to_non_nullable
+as IncidentCategory?,highSeverityOnly: null == highSeverityOnly ? _self.highSeverityOnly : highSeverityOnly // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -168,10 +170,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( MapScope scope,  double centerLat,  double centerLng,  double zoom,  double tilt,  double bearing,  String activeCitySlug,  String activeCityName,  String activeStateCode,  String activeZipCode,  bool carFollowMode,  bool showIncidentsLayer,  bool showTerritoriesLayer,  bool showCamerasLayer,  bool showResidentialDensityLayer,  String searchQuery)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( MapScope scope,  double centerLat,  double centerLng,  double zoom,  double tilt,  double bearing,  String activeCitySlug,  String activeCityName,  String activeStateCode,  String activeZipCode,  bool carFollowMode,  bool showIncidentsLayer,  bool showTerritoriesLayer,  bool showCamerasLayer,  bool showResidentialDensityLayer,  String searchQuery,  IncidentCategory? selectedCategory,  bool highSeverityOnly)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MapViewportState() when $default != null:
-return $default(_that.scope,_that.centerLat,_that.centerLng,_that.zoom,_that.tilt,_that.bearing,_that.activeCitySlug,_that.activeCityName,_that.activeStateCode,_that.activeZipCode,_that.carFollowMode,_that.showIncidentsLayer,_that.showTerritoriesLayer,_that.showCamerasLayer,_that.showResidentialDensityLayer,_that.searchQuery);case _:
+return $default(_that.scope,_that.centerLat,_that.centerLng,_that.zoom,_that.tilt,_that.bearing,_that.activeCitySlug,_that.activeCityName,_that.activeStateCode,_that.activeZipCode,_that.carFollowMode,_that.showIncidentsLayer,_that.showTerritoriesLayer,_that.showCamerasLayer,_that.showResidentialDensityLayer,_that.searchQuery,_that.selectedCategory,_that.highSeverityOnly);case _:
   return orElse();
 
 }
@@ -189,10 +191,10 @@ return $default(_that.scope,_that.centerLat,_that.centerLng,_that.zoom,_that.til
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( MapScope scope,  double centerLat,  double centerLng,  double zoom,  double tilt,  double bearing,  String activeCitySlug,  String activeCityName,  String activeStateCode,  String activeZipCode,  bool carFollowMode,  bool showIncidentsLayer,  bool showTerritoriesLayer,  bool showCamerasLayer,  bool showResidentialDensityLayer,  String searchQuery)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( MapScope scope,  double centerLat,  double centerLng,  double zoom,  double tilt,  double bearing,  String activeCitySlug,  String activeCityName,  String activeStateCode,  String activeZipCode,  bool carFollowMode,  bool showIncidentsLayer,  bool showTerritoriesLayer,  bool showCamerasLayer,  bool showResidentialDensityLayer,  String searchQuery,  IncidentCategory? selectedCategory,  bool highSeverityOnly)  $default,) {final _that = this;
 switch (_that) {
 case _MapViewportState():
-return $default(_that.scope,_that.centerLat,_that.centerLng,_that.zoom,_that.tilt,_that.bearing,_that.activeCitySlug,_that.activeCityName,_that.activeStateCode,_that.activeZipCode,_that.carFollowMode,_that.showIncidentsLayer,_that.showTerritoriesLayer,_that.showCamerasLayer,_that.showResidentialDensityLayer,_that.searchQuery);case _:
+return $default(_that.scope,_that.centerLat,_that.centerLng,_that.zoom,_that.tilt,_that.bearing,_that.activeCitySlug,_that.activeCityName,_that.activeStateCode,_that.activeZipCode,_that.carFollowMode,_that.showIncidentsLayer,_that.showTerritoriesLayer,_that.showCamerasLayer,_that.showResidentialDensityLayer,_that.searchQuery,_that.selectedCategory,_that.highSeverityOnly);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -209,10 +211,10 @@ return $default(_that.scope,_that.centerLat,_that.centerLng,_that.zoom,_that.til
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( MapScope scope,  double centerLat,  double centerLng,  double zoom,  double tilt,  double bearing,  String activeCitySlug,  String activeCityName,  String activeStateCode,  String activeZipCode,  bool carFollowMode,  bool showIncidentsLayer,  bool showTerritoriesLayer,  bool showCamerasLayer,  bool showResidentialDensityLayer,  String searchQuery)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( MapScope scope,  double centerLat,  double centerLng,  double zoom,  double tilt,  double bearing,  String activeCitySlug,  String activeCityName,  String activeStateCode,  String activeZipCode,  bool carFollowMode,  bool showIncidentsLayer,  bool showTerritoriesLayer,  bool showCamerasLayer,  bool showResidentialDensityLayer,  String searchQuery,  IncidentCategory? selectedCategory,  bool highSeverityOnly)?  $default,) {final _that = this;
 switch (_that) {
 case _MapViewportState() when $default != null:
-return $default(_that.scope,_that.centerLat,_that.centerLng,_that.zoom,_that.tilt,_that.bearing,_that.activeCitySlug,_that.activeCityName,_that.activeStateCode,_that.activeZipCode,_that.carFollowMode,_that.showIncidentsLayer,_that.showTerritoriesLayer,_that.showCamerasLayer,_that.showResidentialDensityLayer,_that.searchQuery);case _:
+return $default(_that.scope,_that.centerLat,_that.centerLng,_that.zoom,_that.tilt,_that.bearing,_that.activeCitySlug,_that.activeCityName,_that.activeStateCode,_that.activeZipCode,_that.carFollowMode,_that.showIncidentsLayer,_that.showTerritoriesLayer,_that.showCamerasLayer,_that.showResidentialDensityLayer,_that.searchQuery,_that.selectedCategory,_that.highSeverityOnly);case _:
   return null;
 
 }
@@ -224,7 +226,7 @@ return $default(_that.scope,_that.centerLat,_that.centerLng,_that.zoom,_that.til
 @JsonSerializable()
 
 class _MapViewportState implements MapViewportState {
-  const _MapViewportState({this.scope = MapScope.area, this.centerLat = 33.7756, this.centerLng = -84.3963, this.zoom = 13.5, this.tilt = 45.0, this.bearing = 0.0, this.activeCitySlug = 'atlanta', this.activeCityName = 'Atlanta', this.activeStateCode = 'GA', this.activeZipCode = '30308', this.carFollowMode = true, this.showIncidentsLayer = true, this.showTerritoriesLayer = true, this.showCamerasLayer = true, this.showResidentialDensityLayer = false, this.searchQuery = ''});
+  const _MapViewportState({this.scope = MapScope.area, this.centerLat = 33.7756, this.centerLng = -84.3963, this.zoom = 13.5, this.tilt = 45.0, this.bearing = 0.0, this.activeCitySlug = 'atlanta', this.activeCityName = 'Atlanta', this.activeStateCode = 'GA', this.activeZipCode = '30308', this.carFollowMode = true, this.showIncidentsLayer = true, this.showTerritoriesLayer = true, this.showCamerasLayer = true, this.showResidentialDensityLayer = false, this.searchQuery = '', this.selectedCategory, this.highSeverityOnly = false});
   factory _MapViewportState.fromJson(Map<String, dynamic> json) => _$MapViewportStateFromJson(json);
 
 @override@JsonKey() final  MapScope scope;
@@ -243,6 +245,8 @@ class _MapViewportState implements MapViewportState {
 @override@JsonKey() final  bool showCamerasLayer;
 @override@JsonKey() final  bool showResidentialDensityLayer;
 @override@JsonKey() final  String searchQuery;
+@override final  IncidentCategory? selectedCategory;
+@override@JsonKey() final  bool highSeverityOnly;
 
 /// Create a copy of MapViewportState
 /// with the given fields replaced by the non-null parameter values.
@@ -257,16 +261,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MapViewportState&&(identical(other.scope, scope) || other.scope == scope)&&(identical(other.centerLat, centerLat) || other.centerLat == centerLat)&&(identical(other.centerLng, centerLng) || other.centerLng == centerLng)&&(identical(other.zoom, zoom) || other.zoom == zoom)&&(identical(other.tilt, tilt) || other.tilt == tilt)&&(identical(other.bearing, bearing) || other.bearing == bearing)&&(identical(other.activeCitySlug, activeCitySlug) || other.activeCitySlug == activeCitySlug)&&(identical(other.activeCityName, activeCityName) || other.activeCityName == activeCityName)&&(identical(other.activeStateCode, activeStateCode) || other.activeStateCode == activeStateCode)&&(identical(other.activeZipCode, activeZipCode) || other.activeZipCode == activeZipCode)&&(identical(other.carFollowMode, carFollowMode) || other.carFollowMode == carFollowMode)&&(identical(other.showIncidentsLayer, showIncidentsLayer) || other.showIncidentsLayer == showIncidentsLayer)&&(identical(other.showTerritoriesLayer, showTerritoriesLayer) || other.showTerritoriesLayer == showTerritoriesLayer)&&(identical(other.showCamerasLayer, showCamerasLayer) || other.showCamerasLayer == showCamerasLayer)&&(identical(other.showResidentialDensityLayer, showResidentialDensityLayer) || other.showResidentialDensityLayer == showResidentialDensityLayer)&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MapViewportState&&(identical(other.scope, scope) || other.scope == scope)&&(identical(other.centerLat, centerLat) || other.centerLat == centerLat)&&(identical(other.centerLng, centerLng) || other.centerLng == centerLng)&&(identical(other.zoom, zoom) || other.zoom == zoom)&&(identical(other.tilt, tilt) || other.tilt == tilt)&&(identical(other.bearing, bearing) || other.bearing == bearing)&&(identical(other.activeCitySlug, activeCitySlug) || other.activeCitySlug == activeCitySlug)&&(identical(other.activeCityName, activeCityName) || other.activeCityName == activeCityName)&&(identical(other.activeStateCode, activeStateCode) || other.activeStateCode == activeStateCode)&&(identical(other.activeZipCode, activeZipCode) || other.activeZipCode == activeZipCode)&&(identical(other.carFollowMode, carFollowMode) || other.carFollowMode == carFollowMode)&&(identical(other.showIncidentsLayer, showIncidentsLayer) || other.showIncidentsLayer == showIncidentsLayer)&&(identical(other.showTerritoriesLayer, showTerritoriesLayer) || other.showTerritoriesLayer == showTerritoriesLayer)&&(identical(other.showCamerasLayer, showCamerasLayer) || other.showCamerasLayer == showCamerasLayer)&&(identical(other.showResidentialDensityLayer, showResidentialDensityLayer) || other.showResidentialDensityLayer == showResidentialDensityLayer)&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery)&&(identical(other.selectedCategory, selectedCategory) || other.selectedCategory == selectedCategory)&&(identical(other.highSeverityOnly, highSeverityOnly) || other.highSeverityOnly == highSeverityOnly));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,scope,centerLat,centerLng,zoom,tilt,bearing,activeCitySlug,activeCityName,activeStateCode,activeZipCode,carFollowMode,showIncidentsLayer,showTerritoriesLayer,showCamerasLayer,showResidentialDensityLayer,searchQuery);
+int get hashCode => Object.hash(runtimeType,scope,centerLat,centerLng,zoom,tilt,bearing,activeCitySlug,activeCityName,activeStateCode,activeZipCode,carFollowMode,showIncidentsLayer,showTerritoriesLayer,showCamerasLayer,showResidentialDensityLayer,searchQuery,selectedCategory,highSeverityOnly);
 
 @override
 String toString() {
-  return 'MapViewportState(scope: $scope, centerLat: $centerLat, centerLng: $centerLng, zoom: $zoom, tilt: $tilt, bearing: $bearing, activeCitySlug: $activeCitySlug, activeCityName: $activeCityName, activeStateCode: $activeStateCode, activeZipCode: $activeZipCode, carFollowMode: $carFollowMode, showIncidentsLayer: $showIncidentsLayer, showTerritoriesLayer: $showTerritoriesLayer, showCamerasLayer: $showCamerasLayer, showResidentialDensityLayer: $showResidentialDensityLayer, searchQuery: $searchQuery)';
+  return 'MapViewportState(scope: $scope, centerLat: $centerLat, centerLng: $centerLng, zoom: $zoom, tilt: $tilt, bearing: $bearing, activeCitySlug: $activeCitySlug, activeCityName: $activeCityName, activeStateCode: $activeStateCode, activeZipCode: $activeZipCode, carFollowMode: $carFollowMode, showIncidentsLayer: $showIncidentsLayer, showTerritoriesLayer: $showTerritoriesLayer, showCamerasLayer: $showCamerasLayer, showResidentialDensityLayer: $showResidentialDensityLayer, searchQuery: $searchQuery, selectedCategory: $selectedCategory, highSeverityOnly: $highSeverityOnly)';
 }
 
 
@@ -277,7 +281,7 @@ abstract mixin class _$MapViewportStateCopyWith<$Res> implements $MapViewportSta
   factory _$MapViewportStateCopyWith(_MapViewportState value, $Res Function(_MapViewportState) _then) = __$MapViewportStateCopyWithImpl;
 @override @useResult
 $Res call({
- MapScope scope, double centerLat, double centerLng, double zoom, double tilt, double bearing, String activeCitySlug, String activeCityName, String activeStateCode, String activeZipCode, bool carFollowMode, bool showIncidentsLayer, bool showTerritoriesLayer, bool showCamerasLayer, bool showResidentialDensityLayer, String searchQuery
+ MapScope scope, double centerLat, double centerLng, double zoom, double tilt, double bearing, String activeCitySlug, String activeCityName, String activeStateCode, String activeZipCode, bool carFollowMode, bool showIncidentsLayer, bool showTerritoriesLayer, bool showCamerasLayer, bool showResidentialDensityLayer, String searchQuery, IncidentCategory? selectedCategory, bool highSeverityOnly
 });
 
 
@@ -294,7 +298,7 @@ class __$MapViewportStateCopyWithImpl<$Res>
 
 /// Create a copy of MapViewportState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? scope = null,Object? centerLat = null,Object? centerLng = null,Object? zoom = null,Object? tilt = null,Object? bearing = null,Object? activeCitySlug = null,Object? activeCityName = null,Object? activeStateCode = null,Object? activeZipCode = null,Object? carFollowMode = null,Object? showIncidentsLayer = null,Object? showTerritoriesLayer = null,Object? showCamerasLayer = null,Object? showResidentialDensityLayer = null,Object? searchQuery = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? scope = null,Object? centerLat = null,Object? centerLng = null,Object? zoom = null,Object? tilt = null,Object? bearing = null,Object? activeCitySlug = null,Object? activeCityName = null,Object? activeStateCode = null,Object? activeZipCode = null,Object? carFollowMode = null,Object? showIncidentsLayer = null,Object? showTerritoriesLayer = null,Object? showCamerasLayer = null,Object? showResidentialDensityLayer = null,Object? searchQuery = null,Object? selectedCategory = freezed,Object? highSeverityOnly = null,}) {
   return _then(_MapViewportState(
 scope: null == scope ? _self.scope : scope // ignore: cast_nullable_to_non_nullable
 as MapScope,centerLat: null == centerLat ? _self.centerLat : centerLat // ignore: cast_nullable_to_non_nullable
@@ -312,7 +316,9 @@ as bool,showTerritoriesLayer: null == showTerritoriesLayer ? _self.showTerritori
 as bool,showCamerasLayer: null == showCamerasLayer ? _self.showCamerasLayer : showCamerasLayer // ignore: cast_nullable_to_non_nullable
 as bool,showResidentialDensityLayer: null == showResidentialDensityLayer ? _self.showResidentialDensityLayer : showResidentialDensityLayer // ignore: cast_nullable_to_non_nullable
 as bool,searchQuery: null == searchQuery ? _self.searchQuery : searchQuery // ignore: cast_nullable_to_non_nullable
-as String,
+as String,selectedCategory: freezed == selectedCategory ? _self.selectedCategory : selectedCategory // ignore: cast_nullable_to_non_nullable
+as IncidentCategory?,highSeverityOnly: null == highSeverityOnly ? _self.highSeverityOnly : highSeverityOnly // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

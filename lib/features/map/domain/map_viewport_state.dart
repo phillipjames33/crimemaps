@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../incidents/domain/incident_model.dart';
 import '../../incidents/domain/incident_repository.dart';
 
 part 'map_viewport_state.freezed.dart';
@@ -24,6 +25,8 @@ abstract class MapViewportState with _$MapViewportState {
     @Default(true) bool showCamerasLayer,
     @Default(false) bool showResidentialDensityLayer,
     @Default('') String searchQuery,
+    IncidentCategory? selectedCategory,
+    @Default(false) bool highSeverityOnly,
   }) = _MapViewportState;
 
   factory MapViewportState.fromJson(Map<String, dynamic> json) =>

@@ -41,6 +41,11 @@ export interface MetroBoundingBox {
 }
 
 export const DEFAULT_OVERPASS_ENDPOINT = 'https://overpass-api.de/api/interpreter';
+const FALLBACK_OVERPASS_ENDPOINTS: readonly string[] = [
+  DEFAULT_OVERPASS_ENDPOINT,
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+];
 
 function extractTags(rawTags: unknown): Record<string, string> {
   const rec = asRecord(rawTags);
@@ -226,22 +231,39 @@ export class OverpassCameraFeedAdapter implements CameraFeedAdapter {
   }
 
   async fetchCameras(): Promise<RawCameraRecord[]> {
-    const endpoint = this.config.endpoint ?? DEFAULT_OVERPASS_ENDPOINT;
+    const endpoints =
+      this.config.endpoint !== undefined
+        ? [this.config.endpoint]
+        : FALLBACK_OVERPASS_ENDPOINTS;
     const body = `data=${encodeURIComponent(this.buildOverpassQuery())}`;
-    const res = await this.fetcher(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Accept: 'application/json',
-        'User-Agent': 'CrimeMapsCivicTransparency/1.0',
-      },
-      body,
-    });
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status} querying Overpass API`);
+
+    let payload: Record<string, unknown> | null = null;
+    let lastError: Error | null = null;
+    for (const endpoint of endpoints) {
+      try {
+        const res = await this.fetcher(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Accept: 'application/json',
+            'User-Agent': 'CrimeMapsCivicTransparency/1.0',
+          },
+          body,
+        });
+        if (!res.ok) {
+          lastError = new Error(`HTTP ${res.status} querying Overpass API`);
+          continue;
+        }
+        payload = asRecord(await res.json());
+        if (payload !== null) break;
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error(String(err));
+      }
     }
-    const payload = asRecord(await res.json());
-    if (payload === null) return [];
+    if (payload === null) {
+      if (lastError !== null) throw lastError;
+      return [];
+    }
 
     const records: RawCameraRecord[] = [];
     for (const el of asArray(payload['elements'])) {

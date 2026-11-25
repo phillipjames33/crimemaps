@@ -18,6 +18,8 @@ export interface SyncPublicCamerasDeps {
   adapters: readonly CameraFeedAdapter[];
   now?: Date;
   logger?: LoggerLike;
+  /** Polite delay between sequential OSM Overpass requests to prevent HTTP 429. */
+  interAdapterDelayMs?: number;
 }
 
 export interface SyncPublicCamerasResult {
@@ -35,30 +37,31 @@ export async function runSyncPublicCameras(
   const now = deps.now ?? new Date();
   const log = deps.logger ?? console;
 
-  const settled = await Promise.allSettled(
-    deps.adapters.map(async (adapter) => ({
-      adapterId: adapter.id,
-      records: await adapter.fetchCameras(),
-    })),
-  );
-
   const byId = new Map<string, NormalizedCameraDoc>();
   const failedAdapters: string[] = [];
   let fetched = 0;
   let rejectedPrivateOrUnsupported = 0;
 
-  settled.forEach((result, index) => {
+  const delayMs = deps.interAdapterDelayMs ?? 0;
+  for (let index = 0; index < deps.adapters.length; index++) {
     const adapter = deps.adapters[index];
-    if (result.status === 'rejected') {
+    if (index > 0 && delayMs > 0) {
+      await new Promise<void>((resolve) => setTimeout(resolve, delayMs));
+    }
+
+    let records;
+    try {
+      records = await adapter.fetchCameras();
+    } catch (reason) {
       failedAdapters.push(adapter.id);
       log.error('Camera feed adapter failed', {
         adapterId: adapter.id,
-        error: result.reason instanceof Error ? result.reason.message : String(result.reason),
+        error: reason instanceof Error ? reason.message : String(reason),
       });
-      return;
+      continue;
     }
 
-    for (const raw of result.value.records) {
+    for (const raw of records) {
       fetched += 1;
       const normalized = normalizeCameraRecord(raw, now);
       if (!normalized.accepted) {
@@ -79,7 +82,7 @@ export async function runSyncPublicCameras(
         },
       });
     }
-  });
+  }
 
   const docs = Array.from(byId.values());
   for (let i = 0; i < docs.length; i += FIRESTORE_BATCH_LIMIT) {

@@ -1,4 +1,6 @@
+import 'package:crime_maps/features/incidents/domain/incident_model.dart';
 import 'package:crime_maps/features/incidents/domain/incident_repository.dart';
+import 'package:crime_maps/features/incidents/presentation/incident_providers.dart';
 import 'package:crime_maps/features/map/presentation/map_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -115,6 +117,45 @@ void main() {
       notifier.toggleCarFollowMode();
       expect(container.read(mapControllerProvider).carFollowMode, isFalse);
       expect(container.read(mapControllerProvider).tilt, equals(0.0));
+    });
+
+    test('filters scopedIncidents by category and highSeverityOnly cleanly',
+        () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final notifier = container.read(mapControllerProvider.notifier);
+      notifier.setScope(MapScope.city);
+
+      final allAtlanta = await container.read(scopedIncidentsProvider.future);
+      expect(allAtlanta, isNotEmpty);
+
+      notifier.setCategoryFilter(IncidentCategory.violent);
+      final violentOnly = await container.read(scopedIncidentsProvider.future);
+      expect(violentOnly, isNotEmpty);
+      expect(
+        violentOnly.every((Incident i) => i.category == IncidentCategory.violent),
+        isTrue,
+      );
+
+      notifier.setCategoryFilter(null);
+      notifier.toggleHighSeverityOnly();
+      final highCritOnly = await container.read(scopedIncidentsProvider.future);
+      expect(highCritOnly, isNotEmpty);
+      expect(
+        highCritOnly.every(
+          (Incident i) =>
+              i.severity == IncidentSeverity.high ||
+              i.severity == IncidentSeverity.critical,
+        ),
+        isTrue,
+      );
+
+      notifier.clearIncidentFilters();
+      final reset = container.read(mapControllerProvider);
+      expect(reset.selectedCategory, isNull);
+      expect(reset.highSeverityOnly, isFalse);
+      expect(reset.searchQuery, isEmpty);
     });
   });
 }

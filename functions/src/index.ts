@@ -145,7 +145,7 @@ export const syncPublicCameras = onSchedule(
       deflockApiKey: readSecretOrEnv(deflockApiKeySecret, 'DEFLOCK_API_KEY'),
     });
 
-    await runSyncPublicCameras({ db, adapters, now, logger });
+    await runSyncPublicCameras({ db, adapters, now, logger, interAdapterDelayMs: 2500 });
   },
 );
 

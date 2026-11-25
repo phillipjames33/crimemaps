@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../incidents/domain/incident_model.dart';
 import '../../../incidents/domain/incident_repository.dart';
 import '../map_controller.dart';
 
@@ -17,6 +18,7 @@ class ScopeToggleBar extends ConsumerStatefulWidget {
 
 class _ScopeToggleBarState extends ConsumerState<ScopeToggleBar> {
   late final TextEditingController _searchController;
+  bool _filtersExpanded = false;
 
   @override
   void initState() {
@@ -47,6 +49,13 @@ class _ScopeToggleBarState extends ConsumerState<ScopeToggleBar> {
     final searchQuery = ref.watch(
       mapControllerProvider.select((state) => state.searchQuery),
     );
+    final selectedCategory = ref.watch(
+      mapControllerProvider.select((state) => state.selectedCategory),
+    );
+    final highSeverityOnly = ref.watch(
+      mapControllerProvider.select((state) => state.highSeverityOnly),
+    );
+    final bool hasActiveFilter = selectedCategory != null || highSeverityOnly;
 
     final controller = ref.read(mapControllerProvider.notifier);
 
@@ -96,8 +105,11 @@ class _ScopeToggleBarState extends ConsumerState<ScopeToggleBar> {
                   size: 19,
                   color: AppTheme.accentCyan,
                 ),
-                suffixIcon: searchQuery.isNotEmpty
-                    ? IconButton(
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    if (searchQuery.isNotEmpty)
+                      IconButton(
                         tooltip: 'Clear search',
                         icon: const Icon(
                           Icons.close_rounded,
@@ -108,8 +120,27 @@ class _ScopeToggleBarState extends ConsumerState<ScopeToggleBar> {
                           _searchController.clear();
                           controller.setSearchQuery('');
                         },
-                      )
-                    : null,
+                      ),
+                    IconButton(
+                      key: const Key('map_filter_toggle_button'),
+                      tooltip: 'Filter by category or severity',
+                      icon: Icon(
+                        hasActiveFilter
+                            ? Icons.filter_alt_rounded
+                            : Icons.tune_rounded,
+                        size: 18,
+                        color: hasActiveFilter || _filtersExpanded
+                            ? AppTheme.accentCyan
+                            : AppTheme.textSecondary,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _filtersExpanded = !_filtersExpanded;
+                        });
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -197,7 +228,112 @@ class _ScopeToggleBarState extends ConsumerState<ScopeToggleBar> {
               },
             ),
           ),
+          if (_filtersExpanded || hasActiveFilter) ...<Widget>[
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 28,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: <Widget>[
+                  _FilterChipPill(
+                    key: const Key('filter_category_all'),
+                    label: 'All',
+                    selected: selectedCategory == null,
+                    activeColor: AppTheme.accentCyan,
+                    onTap: () => controller.setCategoryFilter(null),
+                  ),
+                  const SizedBox(width: 6),
+                  _FilterChipPill(
+                    key: const Key('filter_category_violent'),
+                    label: 'Violent',
+                    selected: selectedCategory == IncidentCategory.violent,
+                    activeColor: AppTheme.accentCrimson,
+                    onTap: () => controller.setCategoryFilter(
+                      selectedCategory == IncidentCategory.violent
+                          ? null
+                          : IncidentCategory.violent,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  _FilterChipPill(
+                    key: const Key('filter_category_property'),
+                    label: 'Property',
+                    selected: selectedCategory == IncidentCategory.property,
+                    activeColor: AppTheme.accentAmber,
+                    onTap: () => controller.setCategoryFilter(
+                      selectedCategory == IncidentCategory.property
+                          ? null
+                          : IncidentCategory.property,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  _FilterChipPill(
+                    key: const Key('filter_category_traffic'),
+                    label: 'Traffic / DUI',
+                    selected: selectedCategory == IncidentCategory.trafficDui,
+                    activeColor: AppTheme.accentCyan,
+                    onTap: () => controller.setCategoryFilter(
+                      selectedCategory == IncidentCategory.trafficDui
+                          ? null
+                          : IncidentCategory.trafficDui,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  _FilterChipPill(
+                    key: const Key('filter_high_severity_only'),
+                    label: 'High & Critical',
+                    selected: highSeverityOnly,
+                    activeColor: AppTheme.accentCrimson,
+                    onTap: controller.toggleHighSeverityOnly,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+class _FilterChipPill extends StatelessWidget {
+  const _FilterChipPill({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.activeColor,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final Color activeColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+        decoration: BoxDecoration(
+          color: selected
+              ? activeColor.withValues(alpha: 0.22)
+              : AppTheme.surfaceElevated,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? activeColor : AppTheme.borderSubtle,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? activeColor : AppTheme.textSecondary,
+            fontSize: 11,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          ),
+        ),
       ),
     );
   }

@@ -32,6 +32,8 @@ Future<List<Incident>> scopedIncidents(Ref ref) async {
         citySlug: state.activeCitySlug,
         stateCode: state.activeStateCode,
         searchQuery: state.searchQuery,
+        selectedCategory: state.selectedCategory,
+        highSeverityOnly: state.highSeverityOnly,
       ),
     ),
   );
@@ -46,16 +48,34 @@ Future<List<Incident>> scopedIncidents(Ref ref) async {
   );
 
   final trimmedQuery = queryParams.searchQuery.trim().toLowerCase();
-  if (trimmedQuery.isEmpty) {
+  final selectedCategory = queryParams.selectedCategory;
+  final highSeverityOnly = queryParams.highSeverityOnly;
+
+  if (trimmedQuery.isEmpty && selectedCategory == null && !highSeverityOnly) {
     return incidents;
   }
 
   return incidents.where((Incident incident) {
+    if (selectedCategory != null && incident.category != selectedCategory) {
+      return false;
+    }
+    if (highSeverityOnly &&
+        incident.severity != IncidentSeverity.high &&
+        incident.severity != IncidentSeverity.critical) {
+      return false;
+    }
+    if (trimmedQuery.isEmpty) return true;
+    final offenderName =
+        (incident.allegedOffender?.redacted == false
+                ? incident.allegedOffender?.name
+                : null) ??
+            '';
     return incident.title.toLowerCase().contains(trimmedQuery) ||
         incident.address.toLowerCase().contains(trimmedQuery) ||
         incident.placeName.toLowerCase().contains(trimmedQuery) ||
         incident.cityName.toLowerCase().contains(trimmedQuery) ||
         incident.stateCode.toLowerCase().contains(trimmedQuery) ||
-        incident.sourceAgency.toLowerCase().contains(trimmedQuery);
+        incident.sourceAgency.toLowerCase().contains(trimmedQuery) ||
+        offenderName.toLowerCase().contains(trimmedQuery);
   }).toList();
 }
