@@ -37,7 +37,7 @@ export interface AllegedOffender {
   redactedAt?: Date | null;
 }
 
-export type CrimeFeedProvider = 'socrata' | 'arcgis' | 'spotcrime' | 'mock';
+export type CrimeFeedProvider = 'socrata' | 'arcgis' | 'spotcrime' | 'interpol' | 'mock';
 
 export interface IncidentSourceRef {
   provider: CrimeFeedProvider;

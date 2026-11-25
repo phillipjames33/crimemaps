@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -317,21 +318,46 @@ class _BookingPhotoAvatar extends StatelessWidget {
         height: 82,
         color: AppTheme.surfaceDark,
         child: hasUrl
-            ? CachedNetworkImage(
-                imageUrl: photoUrl!,
-                fit: BoxFit.cover,
-                placeholder: (BuildContext context, String url) =>
-                    const Center(
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-                errorWidget:
-                    (BuildContext context, String url, Object error) =>
+            ? (kIsWeb
+                ? Image.network(
+                    photoUrl!,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (
+                      BuildContext context,
+                      Widget child,
+                      ImageChunkEvent? loadingProgress,
+                    ) {
+                      if (loadingProgress == null) return child;
+                      return const Center(
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      );
+                    },
+                    errorBuilder: (
+                      BuildContext context,
+                      Object error,
+                      StackTrace? stackTrace,
+                    ) =>
                         const _FallbackBookingAvatar(),
-              )
+                  )
+                : CachedNetworkImage(
+                    imageUrl: photoUrl!,
+                    fit: BoxFit.cover,
+                    placeholder: (BuildContext context, String url) =>
+                        const Center(
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                    errorWidget:
+                        (BuildContext context, String url, Object error) =>
+                            const _FallbackBookingAvatar(),
+                  ))
             : const _FallbackBookingAvatar(),
       ),
     );

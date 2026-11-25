@@ -9,6 +9,7 @@ import {
 import {
   ArcGisCrimeFeedAdapter,
   createCrimeFeedAdapters,
+  InterpolRedNoticeAdapter,
   MockCrimeFeedAdapter,
   parseSpotCrimeDate,
   SocrataCrimeFeedAdapter,
@@ -115,6 +116,82 @@ describe('crime feed adapters', () => {
     expect(records[0].externalId).toBe('172814-2026-01');
     expect(records[0].latitude).toBeCloseTo(32.7805);
     expect(records[0].longitude).toBeCloseTo(-96.7987);
+  });
+
+  test('InterpolRedNoticeAdapter maps official US warrant notices with CORS photo URLs', async () => {
+    const fetcher: HttpFetcher = async (url) => {
+      if (url.includes('arrestWarrantCountryId=US')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            _embedded: {
+              notices: [
+                {
+                  entity_id: '1999/46299',
+                  forename: 'DANIEL MIN',
+                  name: 'SUH',
+                  _links: {
+                    self: { href: 'https://ws-public.interpol.int/notices/v1/red/1999-46299' },
+                    thumbnail: { href: 'https://ws-public.interpol.int/notices/v1/red/1999-46299/images/12345' },
+                  },
+                },
+                {
+                  entity_id: '2010/99999',
+                  forename: 'OVERSEAS',
+                  name: 'SAMPLE',
+                  _links: {
+                    self: { href: 'https://ws-public.interpol.int/notices/v1/red/2010-99999' },
+                    thumbnail: { href: 'https://ws-public.interpol.int/notices/v1/red/2010-99999/images/99999' },
+                  },
+                },
+              ],
+            },
+          }),
+        };
+      }
+      if (url.includes('1999-46299')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            entity_id: '1999/46299',
+            forename: 'DANIEL MIN',
+            name: 'SUH',
+            place_of_birth: 'DECATUR, GEORGIA',
+            arrest_warrants: [{ charge: '1) Murder\r\n2) Armed Robbery', issuing_country_id: 'US' }],
+          }),
+        };
+      }
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          entity_id: '2010/99999',
+          forename: 'OVERSEAS',
+          name: 'SAMPLE',
+          place_of_birth: 'UNKNOWN FOREIGN CITY',
+          arrest_warrants: [{ charge: 'Fraud', issuing_country_id: 'US' }],
+        }),
+      };
+    };
+
+    const adapter = new InterpolRedNoticeAdapter(
+      { id: 'interpol_us_warrants', limit: 10 },
+      fetcher,
+      () => new Date('2026-11-24T12:00:00.000Z'),
+    );
+
+    const records = await adapter.fetchRecords(new Date('2026-11-10T00:00:00.000Z'));
+    expect(records).toHaveLength(1);
+    expect(records[0].provider).toBe('interpol');
+    expect(records[0].citySlug).toBe('atlanta');
+    expect(records[0].stateCode).toBe('GA');
+    expect(records[0].booking?.name).toBe('DANIEL MIN SUH');
+    expect(records[0].booking?.bookingPhotoUrl).toBe(
+      'https://ws-public.interpol.int/notices/v1/red/1999-46299/images/12345',
+    );
+    expect(records[0].booking?.charges).toEqual(['Murder', 'Armed Robbery']);
   });
 
   test('ArcGisCrimeFeedAdapter maps FeatureServer attributes + geometry', async () => {

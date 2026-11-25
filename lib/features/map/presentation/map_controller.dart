@@ -88,6 +88,14 @@ class MapController extends _$MapController {
       latitude: 29.7418,
       longitude: -95.4581,
     ),
+    CityPreset(
+      citySlug: 'new_york',
+      cityName: 'New York',
+      stateCode: 'NY',
+      zipCode: '10001',
+      latitude: 40.7128,
+      longitude: -74.0060,
+    ),
   ];
 
   @override

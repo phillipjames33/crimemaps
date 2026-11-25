@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -55,6 +57,7 @@ class _CrimeMapScreenState extends ConsumerState<CrimeMapScreen> {
   double _renderedZoom = 13.5;
   bool _isUpdatingFromGesture = false;
   bool _showSavedOnly = false;
+  bool _showMugshotsOnly = false;
 
   @override
   void initState() {
@@ -378,19 +381,34 @@ class _CrimeMapScreenState extends ConsumerState<CrimeMapScreen> {
       error: (Object error, StackTrace stackTrace) => const <Incident>[],
     );
 
+    bool hasMugshotPhoto(Incident i) {
+      final offender = i.allegedOffender;
+      return offender != null &&
+          !offender.redacted &&
+          (offender.bookingPhotoUrl ?? '').trim().isNotEmpty;
+    }
+
+    final int mugshotCount = allIncidents.where(hasMugshotPhoto).length;
     final bool effectiveSavedOnly =
         _showSavedOnly && savedIncidentIds.isNotEmpty;
-    final incidents = effectiveSavedOnly
-        ? allIncidents
-            .where((Incident i) => savedIncidentIds.contains(i.id))
-            .toList(growable: false)
-        : allIncidents;
-    final filteredIncidentsAsync = effectiveSavedOnly
-        ? incidentsAsync.whenData(
-            (List<Incident> list) => list
-                .where((Incident i) => savedIncidentIds.contains(i.id))
-                .toList(growable: false),
-          )
+    final bool effectiveMugshotsOnly = _showMugshotsOnly && mugshotCount > 0;
+
+    List<Incident> applyActiveFilters(List<Incident> list) {
+      Iterable<Incident> filtered = list;
+      if (effectiveSavedOnly) {
+        filtered = filtered.where(
+          (Incident i) => savedIncidentIds.contains(i.id),
+        );
+      }
+      if (effectiveMugshotsOnly) {
+        filtered = filtered.where(hasMugshotPhoto);
+      }
+      return filtered.toList(growable: false);
+    }
+
+    final incidents = applyActiveFilters(allIncidents);
+    final filteredIncidentsAsync = (effectiveSavedOnly || effectiveMugshotsOnly)
+        ? incidentsAsync.whenData(applyActiveFilters)
         : incidentsAsync;
 
     final territories = territoriesAsync.when(
@@ -471,12 +489,23 @@ class _CrimeMapScreenState extends ConsumerState<CrimeMapScreen> {
           showTerritories: viewport.showTerritoriesLayer,
           showCameras: viewport.showCamerasLayer,
           cameraCount: activeCameras.length,
+          mugshotCount: mugshotCount,
+          showMugshotsOnly: effectiveMugshotsOnly,
+          onToggleMugshotsOnly: () {
+            setState(() {
+              _showMugshotsOnly = !_showMugshotsOnly;
+            });
+          },
           savedIncidentIds: savedIncidentIds,
           showSavedOnly: effectiveSavedOnly,
           onToggleSavedOnly: () {
             setState(() {
               _showSavedOnly = !_showSavedOnly;
             });
+          },
+          canSwitchToCity: viewport.scope == MapScope.area,
+          onSwitchToCity: () {
+            ref.read(mapControllerProvider.notifier).setScope(MapScope.city);
           },
           activeScopeLabel: _scopeSummaryLabel(viewport),
           onTapIncident: _openIncidentSheet,
@@ -544,9 +573,14 @@ class _IncidentPeekCarousel extends StatelessWidget {
     required this.showTerritories,
     required this.showCameras,
     required this.cameraCount,
+    required this.mugshotCount,
+    required this.showMugshotsOnly,
+    required this.onToggleMugshotsOnly,
     required this.savedIncidentIds,
     required this.showSavedOnly,
     required this.onToggleSavedOnly,
+    required this.canSwitchToCity,
+    required this.onSwitchToCity,
     required this.activeScopeLabel,
     required this.onTapIncident,
     required this.onTapTerritory,
@@ -557,9 +591,14 @@ class _IncidentPeekCarousel extends StatelessWidget {
   final bool showTerritories;
   final bool showCameras;
   final int cameraCount;
+  final int mugshotCount;
+  final bool showMugshotsOnly;
+  final VoidCallback onToggleMugshotsOnly;
   final Set<String> savedIncidentIds;
   final bool showSavedOnly;
   final VoidCallback onToggleSavedOnly;
+  final bool canSwitchToCity;
+  final VoidCallback onSwitchToCity;
   final String activeScopeLabel;
   final void Function(Incident incident) onTapIncident;
   final void Function(Territory territory) onTapTerritory;
@@ -635,6 +674,54 @@ class _IncidentPeekCarousel extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (mugshotCount > 0) ...<Widget>[
+                  const SizedBox(width: 8),
+                  InkWell(
+                    key: const Key('map_mugshots_filter_chip'),
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: onToggleMugshotsOnly,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: showMugshotsOnly
+                            ? AppTheme.accentCrimson.withValues(alpha: 0.28)
+                            : AppTheme.accentAmber.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: showMugshotsOnly
+                              ? AppTheme.accentCrimson
+                              : AppTheme.accentAmber.withValues(alpha: 0.65),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Icon(
+                            Icons.badge_outlined,
+                            size: 13,
+                            color: showMugshotsOnly
+                                ? AppTheme.accentCrimson
+                                : AppTheme.accentAmber,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'Mugshots ($mugshotCount)',
+                            style: TextStyle(
+                              color: showMugshotsOnly
+                                  ? AppTheme.textPrimary
+                                  : AppTheme.accentAmber,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
                 if (showCameras && cameraCount > 0) ...<Widget>[
                   const SizedBox(width: 8),
                   Container(
@@ -784,20 +871,51 @@ class _IncidentPeekCarousel extends StatelessWidget {
                     child: Container(
                       margin: const EdgeInsets.symmetric(horizontal: 14),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
+                        horizontal: 14,
+                        vertical: 10,
                       ),
                       decoration: BoxDecoration(
                         color: AppTheme.surfaceDark.withValues(alpha: 0.94),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: AppTheme.borderSubtle),
                       ),
-                      child: const Text(
-                        'No public incidents match the current scope or search filter.',
-                        style: TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: 12.5,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          const Flexible(
+                            child: Text(
+                              'No public incidents match the current scope or search filter.',
+                              style: TextStyle(
+                                color: AppTheme.textSecondary,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                          if (canSwitchToCity) ...<Widget>[
+                            const SizedBox(width: 10),
+                            TextButton(
+                              key: const Key('empty_switch_to_city_button'),
+                              onPressed: onSwitchToCity,
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                minimumSize: Size.zero,
+                                backgroundColor:
+                                    AppTheme.accentCyan.withValues(alpha: 0.16),
+                              ),
+                              child: const Text(
+                                'View City',
+                                style: TextStyle(
+                                  color: AppTheme.accentCyan,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                   );
@@ -812,13 +930,20 @@ class _IncidentPeekCarousel extends StatelessWidget {
                   itemBuilder: (BuildContext context, int index) {
                     final incident = incidents[index];
                     final severityColor = _severityColor(incident.severity);
+                    final offender = incident.allegedOffender;
+                    final String? photoUrl =
+                        offender != null && !offender.redacted
+                            ? offender.bookingPhotoUrl
+                            : null;
+                    final bool hasPhoto =
+                        photoUrl != null && photoUrl.trim().isNotEmpty;
 
                     return InkWell(
                       borderRadius: BorderRadius.circular(16),
                       onTap: () => onTapIncident(incident),
                       child: Container(
-                        width: 268,
-                        padding: const EdgeInsets.all(12),
+                        width: hasPhoto ? 304 : 268,
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: AppTheme.surfaceDark.withValues(alpha: 0.95),
                           borderRadius: BorderRadius.circular(16),
@@ -826,105 +951,122 @@ class _IncidentPeekCarousel extends StatelessWidget {
                             color: severityColor.withValues(alpha: 0.45),
                           ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Row(
                           children: <Widget>[
-                            Row(
-                              children: <Widget>[
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color: severityColor,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  incident.severity.name.toUpperCase(),
-                                  style: TextStyle(
-                                    color: severityColor,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                if (incident.allegedOffender != null)
-                                  Container(
-                                    margin: const EdgeInsets.only(right: 6),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 5,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.accentAmber
-                                          .withValues(alpha: 0.16),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: const Text(
-                                      'Booking',
-                                      style: TextStyle(
-                                        color: AppTheme.accentAmber,
-                                        fontSize: 9.5,
-                                        fontWeight: FontWeight.w700,
+                            if (hasPhoto) ...<Widget>[
+                              _CarouselMugshotThumb(photoUrl: photoUrl),
+                              const SizedBox(width: 10),
+                            ],
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Row(
+                                    children: <Widget>[
+                                      Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color: severityColor,
+                                          shape: BoxShape.circle,
+                                        ),
                                       ),
-                                    ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        incident.severity.name.toUpperCase(),
+                                        style: TextStyle(
+                                          color: severityColor,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      if (incident.allegedOffender != null)
+                                        Container(
+                                          margin:
+                                              const EdgeInsets.only(right: 6),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 5,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.accentAmber
+                                                .withValues(alpha: 0.16),
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            hasPhoto ? 'Mugshot' : 'Booking',
+                                            style: const TextStyle(
+                                              color: AppTheme.accentAmber,
+                                              fontSize: 9.5,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ),
+                                      if (savedIncidentIds
+                                          .contains(incident.id))
+                                        const Padding(
+                                          padding: EdgeInsets.only(right: 4),
+                                          child: Icon(
+                                            Icons.bookmark_rounded,
+                                            size: 12,
+                                            color: AppTheme.accentAmber,
+                                          ),
+                                        ),
+                                      Expanded(
+                                        child: Text(
+                                          timeFormat.format(
+                                            incident.occurredAt.toLocal(),
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.end,
+                                          style: const TextStyle(
+                                            color: AppTheme.textSecondary,
+                                            fontSize: 10.5,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                if (savedIncidentIds.contains(incident.id))
-                                  const Padding(
-                                    padding: EdgeInsets.only(right: 4),
-                                    child: Icon(
-                                      Icons.bookmark_rounded,
-                                      size: 12,
-                                      color: AppTheme.accentAmber,
-                                    ),
-                                  ),
-                                Expanded(
-                                  child: Text(
-                                    timeFormat
-                                        .format(incident.occurredAt.toLocal()),
+                                  Text(
+                                    hasPhoto
+                                        ? '${offender!.name} • ${incident.title}'
+                                        : incident.title,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.end,
                                     style: const TextStyle(
-                                      color: AppTheme.textSecondary,
-                                      fontSize: 10.5,
+                                      color: AppTheme.textPrimary,
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              incident.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: AppTheme.textPrimary,
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.w700,
+                                  Row(
+                                    children: <Widget>[
+                                      const Icon(
+                                        Icons.place_outlined,
+                                        size: 13,
+                                        color: AppTheme.accentCyan,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          '${incident.placeName} • ${incident.address}',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            color: AppTheme.textSecondary,
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                            ),
-                            Row(
-                              children: <Widget>[
-                                const Icon(
-                                  Icons.place_outlined,
-                                  size: 13,
-                                  color: AppTheme.accentCyan,
-                                ),
-                                const SizedBox(width: 4),
-                                Expanded(
-                                  child: Text(
-                                    '${incident.placeName} • ${incident.address}',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      color: AppTheme.textSecondary,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ),
-                              ],
                             ),
                           ],
                         ),
@@ -936,6 +1078,60 @@ class _IncidentPeekCarousel extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _CarouselMugshotThumb extends StatelessWidget {
+  const _CarouselMugshotThumb({required this.photoUrl});
+
+  final String photoUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        width: 56,
+        height: 82,
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceElevated,
+          border: Border.all(
+            color: AppTheme.accentAmber.withValues(alpha: 0.45),
+          ),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: kIsWeb
+            ? Image.network(
+                photoUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (
+                  BuildContext context,
+                  Object error,
+                  StackTrace? stackTrace,
+                ) =>
+                    const Center(
+                  child: Icon(
+                    Icons.person_outline_rounded,
+                    size: 24,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              )
+            : CachedNetworkImage(
+                imageUrl: photoUrl,
+                fit: BoxFit.cover,
+                errorWidget:
+                    (BuildContext context, String url, Object error) =>
+                        const Center(
+                  child: Icon(
+                    Icons.person_outline_rounded,
+                    size: 24,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ),
       ),
     );
   }
