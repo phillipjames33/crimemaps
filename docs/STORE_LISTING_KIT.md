@@ -29,9 +29,9 @@ crime map,public safety,neighborhood safety,civic cameras,alpr map,local radio,i
 Navigate your city with real-time public safety intelligence, civic infrastructure transparency, and 100% independent local music — all in one dark-mode car-navigation interface.
 
 LIVE PUBLIC SAFETY MAP
-• Switch seamlessly between My Area (5 mi), City, and State views with zoom-aware incident clustering and instant city quick-jump presets (Atlanta, Chicago, San Francisco, Dallas, Los Angeles, Houston, and Savannah).
-• Inspect incident details with Street View imagery and Photorealistic 3D contextual views.
-• Powered by publicly available municipal open-data portals (including Chicago PD, San Francisco PD, and Dallas PD live feeds).
+• Switch seamlessly between My Area (5 mi), City, and State views with zoom-aware incident clustering, category & severity filters, local incident bookmarks, and instant city quick-jump presets (Atlanta, Chicago, San Francisco, Dallas, Los Angeles, Houston, New York, and Savannah).
+• Inspect incident details with Street View imagery, Photorealistic 3D contextual views, and 1-tap Mugshots / Public Warrant filtering.
+• Powered by publicly available municipal open-data portals (including Chicago PD, San Francisco PD, and Dallas PD live feeds) and official public U.S. arrest warrant notices (INTERPOL).
 
 CIVIC CAMERA TRANSPARENCY & PRIVACY AWARENESS
 • Visualize publicly documented civic infrastructure cameras (municipal ALPR / Flock poles, DOT traffic cameras, and public intersection monitoring) sourced from open civic datasets (OpenStreetMap).
@@ -98,8 +98,8 @@ Create these exact Product IDs in **Google Play Console** (`com.crimemaps.crime_
 
 ## 4. Store Graphic Assets Generated in Repository
 
-- **App Icons:** Installed across Android `mipmap-*`, all 15 opaque iOS `AppIcon.appiconset` PNGs (including `1024x1024` App Store icon), and Web `icons/`.
-- **Google Play Feature Graphic (`1024 x 500`):** [assets/store/feature_graphic_1024x500.png](../assets/store/feature_graphic_1024x500.png)
+- **Google Play Hi-Res App Icon (`512 x 512`):** [assets/store/app_icon_512x512.png](../assets/store/app_icon_512x512.png) (plus Android `mipmap-*`, all 15 opaque iOS `AppIcon.appiconset` PNGs including `1024x1024`, and Web `icons/`)
+- **Google Play Feature Graphic (`1024 x 500`):** [assets/store/feature_graphic_1024x500.png](../assets/store/feature_graphic_1024x500.png) (also hosted as OpenGraph preview at `https://crimemaps-515702.web.app/og-card.png`)
 - **Live Android Phone Screenshots (`1080 x 2400`):** [assets/store/screenshots/](../assets/store/screenshots/)
 
 ---

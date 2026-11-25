@@ -42,7 +42,7 @@ final jailBookingAdapterProvider = Provider<JailBookingAdapter>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef JailBookingAdapterRef = ProviderRef<JailBookingAdapter>;
-String _$scopedIncidentsHash() => r'13df5a7eaa754f3a1d0dfa38375b3a29a052c84c';
+String _$scopedIncidentsHash() => r'4b3502ddd31631c6304d19d3303016df71835d46';
 
 /// See also [scopedIncidents].
 @ProviderFor(scopedIncidents)
